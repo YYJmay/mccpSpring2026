@@ -3,566 +3,1015 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Structure: Interconnections - Adaptive Parameter Selection for KRR</title>
+    <title>Causal Graph Regression - Interactive Architecture Analysis</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1a2e;
-            min-height: 100vh;
-            color: #eee;
-        }
-        .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
+        }
+
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* ====== Header ====== */
+        .header {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
             text-align: center;
         }
-        .header h1 { font-size: 1.4em; margin-bottom: 8px; }
-        .header p { opacity: 0.9; font-size: 0.9em; }
-        
-        .main-container {
-            display: flex;
-            min-height: calc(100vh - 100px);
-        }
-        
-        /* Network Diagram */
-        .network-panel {
-            flex: 1;
-            padding: 20px;
-            position: relative;
-            overflow: auto;
-        }
-        
-        .network-svg {
-            width: 100%;
-            height: 600px;
-        }
-        
-        /* Detail Panel */
-        .detail-panel {
-            width: 380px;
-            background: #16213e;
-            padding: 20px;
-            border-left: 1px solid #333;
-            overflow-y: auto;
-            max-height: calc(100vh - 100px);
-        }
-        .detail-title {
-            font-size: 1.1em;
+
+        .header h1 {
             color: #667eea;
+            font-size: 2.5em;
             margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #333;
+            font-weight: 700;
         }
-        .detail-section {
-            margin-bottom: 20px;
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            margin: 8px 0;
         }
-        .detail-section h4 {
-            color: #a0aec0;
-            font-size: 0.8em;
-            text-transform: uppercase;
+
+        .author-info {
+            color: #999;
+            font-size: 0.95em;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        /* ====== Network Diagram ====== */
+        .network-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .network-container {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .module-node {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            font-weight: 700;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-node:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .module-node::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .module-node:hover::before {
+            opacity: 1;
+        }
+
+        .module-number {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+
+        .module-label {
+            font-size: 0.9em;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .node-intro { background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%); }
+        .node-related { background: linear-gradient(135deg, #4ECDC4 0%, #45B7B8 100%); }
+        .node-prelim { background: linear-gradient(135deg, #45B7D1 0%, #3FA7C1 100%); }
+        .node-method { background: linear-gradient(135deg, #FFA07A 0%, #FF8C66 100%); }
+        .node-exp { background: linear-gradient(135deg, #98D8C8 0%, #80C8B8 100%); }
+        .node-conc { background: linear-gradient(135deg, #F7DC6F 0%, #EFC94A 100%); color: #333; }
+
+        /* ====== Connection Visualization ====== */
+        .connection-map {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .connection-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .flow-stage {
+            flex: 1;
+            text-align: center;
+        }
+
+        .flow-stage-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .flow-stage-title {
+            font-weight: 600;
+            color: #333;
             margin-bottom: 8px;
         }
-        .detail-text {
-            background: #1a1a2e;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.85em;
-            line-height: 1.6;
-            color: #cbd5e0;
+
+        .flow-stage-desc {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.5;
         }
-        .detail-text em {
-            color: #ffd700;
-            font-style: normal;
+
+        .flow-arrow {
+            font-size: 2em;
+            color: #667eea;
+            margin: 0 15px;
+            animation: pulse 1.5s infinite;
         }
-        
-        .connections-list {
-            list-style: none;
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
-        .connections-list li {
-            background: #1a1a2e;
-            padding: 8px 12px;
-            margin: 5px 0;
-            border-radius: 6px;
-            font-size: 0.85em;
+
+        /* ====== Content Grid ====== */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            padding: 20px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             cursor: pointer;
-            transition: all 0.2s;
+        }
+
+        .card-header:hover {
+            opacity: 0.9;
+        }
+
+        .card-toggle {
+            font-size: 1.5em;
+            transition: transform 0.3s ease;
+        }
+
+        .card-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .card-body {
+            padding: 25px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .card-body.open {
+            max-height: 2000px;
+        }
+
+        .card-intro { --color: #FF6B6B; }
+        .card-intro .card-header { background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%); }
+
+        .card-related { --color: #4ECDC4; }
+        .card-related .card-header { background: linear-gradient(135deg, #4ECDC4 0%, #45B7B8 100%); }
+
+        .card-prelim { --color: #45B7D1; }
+        .card-prelim .card-header { background: linear-gradient(135deg, #45B7D1 0%, #3FA7C1 100%); }
+
+        .card-method { --color: #FFA07A; }
+        .card-method .card-header { background: linear-gradient(135deg, #FFA07A 0%, #FF8C66 100%); }
+
+        .card-exp { --color: #98D8C8; }
+        .card-exp .card-header { background: linear-gradient(135deg, #98D8C8 0%, #80C8B8 100%); }
+
+        .card-conc { --color: #F7DC6F; }
+        .card-conc .card-header { background: linear-gradient(135deg, #F7DC6F 0%, #EFC94A 100%); color: #333; }
+
+        /* ====== Card Content ====== */
+        .content-section {
+            margin-bottom: 20px;
+        }
+
+        .content-section h3 {
+            color: var(--color);
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .connections-list li:hover {
-            background: #2d3748;
+
+        .content-section h3::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: var(--color);
+            border-radius: 50%;
         }
-        .arrow { color: #667eea; }
-        
-        /* Node styles */
-        .node {
-            cursor: pointer;
-            transition: all 0.2s;
+
+        .quote {
+            background: #f5f5f5;
+            border-left: 4px solid var(--color);
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #333;
+            font-style: italic;
         }
-        .node:hover { filter: brightness(1.2); }
-        .node-circle {
-            stroke: #fff;
-            stroke-width: 2;
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
         }
-        .node-text {
-            fill: #fff;
-            font-size: 11px;
-            text-anchor: middle;
-            pointer-events: none;
-        }
-        .node-label {
-            fill: #a0aec0;
-            font-size: 10px;
-            text-anchor: middle;
-            pointer-events: none;
-        }
-        
-        /* Edge styles */
-        .edge {
-            stroke: #4a5568;
-            stroke-width: 2;
-            fill: none;
-            opacity: 0.6;
-        }
-        .edge.highlighted {
-            stroke: #ffd700;
-            stroke-width: 3;
-            opacity: 1;
-        }
-        .edge-arrow {
-            fill: #4a5568;
-        }
-        
-        /* Legend */
-        .legend {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(22, 33, 62, 0.95);
+
+        .connection-box {
+            background: #f0f4ff;
+            border: 2px solid var(--color);
+            border-radius: 8px;
             padding: 15px;
-            border-radius: 10px;
-            font-size: 0.8em;
+            margin: 12px 0;
         }
+
+        .connection-title {
+            color: var(--color);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .connection-text {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        /* ====== Central Theme ====== */
+        .central-theme {
+            background: linear-gradient(135deg, #fff5f5 0%, #fff0f5 100%);
+            border: 3px solid #FF6B6B;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .central-theme h2 {
+            color: #FF6B6B;
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .theme-content {
+            color: #555;
+            line-height: 1.8;
+            font-size: 1em;
+        }
+
+        .theme-journey {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-top: 15px;
+            flex-direction: column;
+        }
+
+        .journey-item {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #FF6B6B;
+            width: 100%;
+        }
+
+        .journey-arrow {
+            color: #FF6B6B;
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        /* ====== Detailed Analysis ====== */
+        .detailed-analysis {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .analysis-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .analysis-card h4 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+
+        .analysis-card p {
+            color: #555;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        /* ====== Legend ====== */
+        .legend {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        .legend h3 {
+            color: #667eea;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin: 5px 0;
+            gap: 12px;
         }
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
         }
-        
-        .selected { 
-            stroke: #ffd700 !important; 
-            stroke-width: 4 !important; 
+
+        .legend-text {
+            color: #333;
+            font-size: 0.95em;
+            font-weight: 600;
         }
-        
-        .instruction {
+
+        /* ====== Responsive ====== */
+        @media (max-width: 1200px) {
+            .network-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .network-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .module-node {
+                font-size: 0.9em;
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        /* ====== Footer ====== */
+        .footer {
             text-align: center;
-            padding: 10px;
-            background: #16213e;
-            color: #a0aec0;
-            font-size: 0.85em;
+            padding: 20px;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        ul li {
+            margin-bottom: 8px;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Adaptive Parameter Selection for Kernel Ridge Regression</h1>
-        <p>Shao-Bo Lin | Xi'an Jiaotong University</p>
-    </div>
-    
-    <div class="instruction">Click on any node to see its text excerpt and connections</div>
-    
     <div class="main-container">
-        <div class="network-panel">
-            <svg class="network-svg" id="network">
-                <!-- Arrows definition -->
-                <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#4a5568"/>
-                    </marker>
-                    <marker id="arrowhead-gold" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#ffd700"/>
-                    </marker>
-                </defs>
-                
-                <!-- Edges (connections) -->
-                <g id="edges">
-                    <!-- Assumptions feed into Lemmas -->
-                    <path class="edge" id="edge-a1-l1" d="M 180,150 Q 200,200 280,220" marker-end="url(#arrowhead)"/>
-                    <path class="edge" id="edge-a2-l1" d="M 180,220 L 280,220" marker-end="url(#arrowhead)"/>
-                    <path class="edge" id="edge-a3-l1" d="M 180,290 Q 200,260 280,220" marker-end="url(#arrowhead)"/>
-                    
-                    <!-- Assumptions feed into Proposition -->
-                    <path class="edge" id="edge-a1-p1" d="M 180,150 Q 300,100 420,150" marker-end="url(#arrowhead)"/>
-                    <path class="edge" id="edge-a2-p1" d="M 180,220 Q 300,180 420,150" marker-end="url(#arrowhead)"/>
-                    
-                    <!-- Lemma 1 referenced by Theorem -->
-                    <path class="edge" id="edge-l1-t1" d="M 340,220 Q 450,280 540,320" marker-end="url(#arrowhead)"/>
-                    
-                    <!-- Lemma 2 motivates the problem -->
-                    <path class="edge" id="edge-l2-d1" d="M 340,320 Q 400,320 420,250" marker-end="url(#arrowhead)"/>
-                    
-                    <!-- Proposition enables Definition -->
-                    <path class="edge" id="edge-p1-d1" d="M 480,150 Q 500,200 480,250" marker-end="url(#arrowhead)"/>
-                    
-                    <!-- Definition leads to Theorem -->
-                    <path class="edge" id="edge-d1-t1" d="M 480,250 Q 510,280 540,320" marker-end="url(#arrowhead)"/>
-                    
-                    <!-- Proof Lemmas feed into Proposition proof -->
-                    <path class="edge" id="edge-pl3-p1" d="M 680,150 Q 600,150 480,150" marker-end="url(#arrowhead)"/>
-                    
-                    <!-- Proof Lemmas feed into Theorem -->
-                    <path class="edge" id="edge-pl4-t1" d="M 680,220 Q 620,270 600,320" marker-end="url(#arrowhead)"/>
-                    <path class="edge" id="edge-pl5-t1" d="M 680,290 Q 640,300 600,320" marker-end="url(#arrowhead)"/>
-                    <path class="edge" id="edge-pl6-t1" d="M 680,360 Q 650,350 600,320" marker-end="url(#arrowhead)"/>
-                </g>
-                
-                <!-- Nodes -->
-                <g id="nodes">
-                    <!-- Section labels -->
-                    <text x="120" y="100" fill="#667eea" font-size="12" font-weight="bold">FOUNDATIONS</text>
-                    <text x="420" y="100" fill="#9f7aea" font-size="12" font-weight="bold">MAIN CONTRIBUTIONS</text>
-                    <text x="650" y="100" fill="#ed8936" font-size="12" font-weight="bold">PROOFS</text>
-                    
-                    <!-- Assumptions (green) -->
-                    <g class="node" data-id="a1" onclick="selectNode('a1')">
-                        <circle class="node-circle" cx="120" cy="150" r="28" fill="#48bb78"/>
-                        <text class="node-text" x="120" y="154">A1</text>
-                        <text class="node-label" x="120" y="190">Boundedness</text>
-                    </g>
-                    <g class="node" data-id="a2" onclick="selectNode('a2')">
-                        <circle class="node-circle" cx="120" cy="220" r="28" fill="#48bb78"/>
-                        <text class="node-text" x="120" y="224">A2</text>
-                        <text class="node-label" x="120" y="260">Regularity</text>
-                    </g>
-                    <g class="node" data-id="a3" onclick="selectNode('a3')">
-                        <circle class="node-circle" cx="120" cy="290" r="28" fill="#48bb78"/>
-                        <text class="node-text" x="120" y="294">A3</text>
-                        <text class="node-label" x="120" y="330">Eff. Dimension</text>
-                    </g>
-                    
-                    <!-- Lemmas (orange) -->
-                    <g class="node" data-id="l1" onclick="selectNode('l1')">
-                        <circle class="node-circle" cx="280" cy="220" r="32" fill="#ed8936"/>
-                        <text class="node-text" x="280" y="224">L1</text>
-                        <text class="node-label" x="280" y="265">Optimal KRR</text>
-                    </g>
-                    <g class="node" data-id="l2" onclick="selectNode('l2')">
-                        <circle class="node-circle" cx="280" cy="320" r="32" fill="#ed8936"/>
-                        <text class="node-text" x="280" y="324">L2</text>
-                        <text class="node-label" x="280" y="365">LP Rates</text>
-                    </g>
-                    
-                    <!-- Proposition (purple) -->
-                    <g class="node" data-id="p1" onclick="selectNode('p1')">
-                        <circle class="node-circle" cx="420" cy="150" r="32" fill="#9f7aea"/>
-                        <text class="node-text" x="420" y="154">P1</text>
-                        <text class="node-label" x="420" y="195">Spectral Property</text>
-                    </g>
-                    
-                    <!-- Definition (teal) -->
-                    <g class="node" data-id="d1" onclick="selectNode('d1')">
-                        <circle class="node-circle" cx="420" cy="250" r="32" fill="#38b2ac"/>
-                        <text class="node-text" x="420" y="254">D1</text>
-                        <text class="node-label" x="420" y="295">ASUS Method</text>
-                    </g>
-                    
-                    <!-- Theorem (red) - Main Result -->
-                    <g class="node" data-id="t1" onclick="selectNode('t1')">
-                        <circle class="node-circle" cx="540" cy="320" r="40" fill="#e53e3e"/>
-                        <text class="node-text" x="540" y="316">T1</text>
-                        <text class="node-text" x="540" y="330" font-size="9">MAIN</text>
-                        <text class="node-label" x="540" y="375">Optimal Rates</text>
-                    </g>
-                    
-                    <!-- Proof Lemmas (orange, smaller) -->
-                    <g class="node" data-id="pl3" onclick="selectNode('pl3')">
-                        <circle class="node-circle" cx="680" cy="150" r="24" fill="#dd6b20"/>
-                        <text class="node-text" x="680" y="154">L3</text>
-                        <text class="node-label" x="680" y="185">Operator Bounds</text>
-                    </g>
-                    <g class="node" data-id="pl4" onclick="selectNode('pl4')">
-                        <circle class="node-circle" cx="680" cy="220" r="24" fill="#dd6b20"/>
-                        <text class="node-text" x="680" y="224">L4</text>
-                        <text class="node-label" x="680" y="255">Error Decomp</text>
-                    </g>
-                    <g class="node" data-id="pl5" onclick="selectNode('pl5')">
-                        <circle class="node-circle" cx="680" cy="290" r="24" fill="#dd6b20"/>
-                        <text class="node-text" x="680" y="294">L5</text>
-                        <text class="node-label" x="680" y="325">Small λ Case</text>
-                    </g>
-                    <g class="node" data-id="pl6" onclick="selectNode('pl6')">
-                        <circle class="node-circle" cx="680" cy="360" r="24" fill="#dd6b20"/>
-                        <text class="node-text" x="680" y="364">L6</text>
-                        <text class="node-label" x="680" y="395">Large λ Case</text>
-                    </g>
-                </g>
-            </svg>
-            
-            <div class="legend">
-                <div class="legend-item"><div class="legend-dot" style="background:#48bb78"></div> Assumptions</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#ed8936"></div> Lemmas</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#9f7aea"></div> Proposition</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#38b2ac"></div> Definition</div>
-                <div class="legend-item"><div class="legend-dot" style="background:#e53e3e"></div> Theorem</div>
+        <!-- Header -->
+        <div class="header">
+            <h1>🔗 Causal Graph Regression: Interactive Paper Architecture</h1>
+            <p>A Deep Dive into Interconnections Between Core Concepts</p>
+            <p>Visualizing the relationships, concept flows, and scholarly connections across paper modules</p>
+            <div class="author-info">
+                <strong>Paper Source:</strong> ICML 2025 | Authors: Yujia Yin, Tianyi Qu, Zihao Wang, Yifan Chen
             </div>
         </div>
-        
-        <div class="detail-panel" id="detail-panel">
-            <div class="detail-title" id="detail-title">Select a node to view details</div>
-            <div id="detail-content">
-                <p style="color:#718096;">Click on any node in the network diagram to see its text excerpt and connections to other parts of the paper.</p>
+
+        <!-- Network Overview -->
+        <div class="network-section">
+            <h2 class="section-title">📊 Paper Module Network Structure</h2>
+            <div class="network-container">
+                <div class="module-node node-intro" onclick="highlightModule('intro')">
+                    <div class="module-number">①</div>
+                    <div class="module-label">Introduction<br/>Problem</div>
+                </div>
+                <div class="module-node node-related" onclick="highlightModule('related')">
+                    <div class="module-number">②</div>
+                    <div class="module-label">Related Work<br/>Survey</div>
+                </div>
+                <div class="module-node node-prelim" onclick="highlightModule('prelim')">
+                    <div class="module-number">③</div>
+                    <div class="module-label">Preliminaries<br/>Foundation</div>
+                </div>
+                <div class="module-node node-method" onclick="highlightModule('method')">
+                    <div class="module-number">④</div>
+                    <div class="module-label">Method<br/>Innovation</div>
+                </div>
+                <div class="module-node node-exp" onclick="highlightModule('exp')">
+                    <div class="module-number">⑤</div>
+                    <div class="module-label">Experiments<br/>Validation</div>
+                </div>
+                <div class="module-node node-conc" onclick="highlightModule('conc')">
+                    <div class="module-number">⑥</div>
+                    <div class="module-label">Conclusion<br/>Summary</div>
+                </div>
             </div>
+
+            <!-- Connection Flow -->
+            <div class="connection-map">
+                <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.3em; font-weight: 700;">🔄 Core Concept Flow Path</h3>
+                
+                <div class="connection-flow">
+                    <div class="flow-stage">
+                        <div class="flow-stage-number">①</div>
+                        <div class="flow-stage-title">Problem Identification</div>
+                        <div class="flow-stage-desc">CGL fails to handle confounding effects in regression</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-stage">
+                        <div class="flow-stage-number">②</div>
+                        <div class="flow-stage-title">Literature Analysis</div>
+                        <div class="flow-stage-desc">Existing methods ignore predictive power of confounders</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-stage">
+                        <div class="flow-stage-number">③</div>
+                        <div class="flow-stage-title">Theoretical Foundation</div>
+                        <div class="flow-stage-desc">Standard GIB assumes confounding has no predictive capacity</div>
+                    </div>
+                </div>
+
+                <div class="connection-flow">
+                    <div class="flow-stage">
+                        <div class="flow-stage-number">④</div>
+                        <div class="flow-stage-title">Method Innovation</div>
+                        <div class="flow-stage-desc">Enhanced GIB + Contrastive Learning intervention</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-stage">
+                        <div class="flow-stage-number">⑤</div>
+                        <div class="flow-stage-title">Experimental Validation</div>
+                        <div class="flow-stage-desc">SOTA performance + 42% improvement + Ablation studies</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-stage">
+                        <div class="flow-stage-number">⑥</div>
+                        <div class="flow-stage-title">Conclusion & Contributions</div>
+                        <div class="flow-stage-desc">First explicit consideration of confounding predictive role</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Central Theme -->
+        <div class="central-theme">
+            <h2>🎯 Central Theme: The Complete Journey of Confounding Effects</h2>
+            <div class="theme-content">
+                <p>This paper revolves around <span class="highlight">Confounding Effects</span>, building a complete argument through six interconnected sections:</p>
+                <div class="theme-journey">
+                    <div class="journey-item">
+                        <strong>Section 1 (Introduction):</strong> Problem identification → Existing CGL methods wrongly assume confounding subgraphs have no predictive power, but examples like molecular weight vs. toxicity show confounders exhibit correlations.
+                    </div>
+                    <div class="journey-arrow">⬇</div>
+                    <div class="journey-item">
+                        <strong>Section 2 (Related Work):</strong> Literature review → Examines three approaches (invariant learning, causal modeling, stable learning) that fail to adequately handle confounding effects, especially in regression tasks.
+                    </div>
+                    <div class="journey-arrow">⬇</div>
+                    <div class="journey-item">
+                        <strong>Section 3 (Preliminaries):</strong> Theoretical framework → Formally defines SCM and GIB principles, highlighting standard GIB's limitation: assuming confounding subgraphs lack predictive ability.
+                    </div>
+                    <div class="journey-arrow">⬇</div>
+                    <div class="journey-item">
+                        <strong>Section 4 (Method):</strong> Proposed solution → Enhanced GIB: −I(C; Y) + α·I(C; G) − β·I(S; Y), explicitly modeling confounders' predictive capacity; contrastive learning-driven causal intervention.
+                    </div>
+                    <div class="journey-arrow">⬇</div>
+                    <div class="journey-item">
+                        <strong>Section 5 (Experiments):</strong> Experimental validation → Achieves SOTA performance on GOOD-ZINC and ReactionOOD, ablation studies confirm necessity of both loss functions.
+                    </div>
+                    <div class="journey-arrow">⬇</div>
+                    <div class="journey-item">
+                        <strong>Section 6 (Conclusion):</strong> Summary of contributions → Three main contributions: (1) First explicit consideration of confounding predictive role (2) Label-free contrastive learning intervention (3) Significant OOD generalization improvement.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Module Cards -->
+        <div class="content-grid">
+            <!-- Introduction -->
+            <div class="module-card card-intro">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <span>① Introduction: Problem Motivation & Theoretical Gap</span>
+                    <span class="card-toggle">▼</span>
+                </div>
+                <div class="card-body">
+                    <div class="content-section">
+                        <h3>🔴 Core Problem</h3>
+                        <div class="quote">
+                            "Causal graph learning (CGL) shows promising results in classification settings, but regression tasks remain largely unexplored, particularly in handling confounding effects."
+                        </div>
+                        <p>The paper identifies a critical flawed assumption: existing CGL methods assume confounding subgraph S has absolutely no predictive power.</p>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>⚠️ Questioned Assumption</h3>
+                        <div class="quote">
+                            "molecular weight is noncausal to toxicity while does exhibit strong correlations"
+                        </div>
+                        <p>This counterexample shows that confounders (though non-causal) can have significant correlations and predictive power.</p>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>🔗 Connections to Later Sections</h3>
+                        <div class="connection-box">
+                            <div class="connection-title">→ Section 2 (Related Work):</div>
+                            <div class="connection-text">Problem severity triggers systematic review of existing methods</div>
+                        </div>
+                        <div class="connection-box">
+                            <div class="connection-title">→ Section 4 (Method):</div>
+                            <div class="connection-text">This unreasonable assumption directly motivates the new enhanced GIB formula</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Work -->
+            <div class="module-card card-related">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <span>② Related Work: Limitations of Existing Approaches</span>
+                    <span class="card-toggle">▼</span>
+                </div>
+                <div class="card-body">
+                    <div class="content-section">
+                        <h3>🔵 Three Major Categories of Methods & Their Issues</h3>
+                        <div class="quote">
+                            "Invariant learning (CIGA, GSAT): Designed for classification tasks, difficult to adapt to regression"
+                        </div>
+                        <div class="quote">
+                            "Causal modeling (CAL, DisC): Ignore predictive power of confounders, rely on label information"
+                        </div>
+                        <div class="quote">
+                            "Stable learning: Heuristic reweighting, fails to fully decouple causal and confounding"
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>📉 Critical Technical Gaps</h3>
+                        <ul>
+                            <li>Parameter selection challenges in regression tasks</li>
+                            <li>Label-dependent methods cannot generalize to continuous outputs</li>
+                            <li>Lack of unified framework for handling confounding effects</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>🔗 Bridge Role with Other Sections</h3>
+                        <div class="connection-box">
+                            <div class="connection-title">← From Section 1:</div>
+                            <div class="connection-text">Confirms the problem's pervasiveness and urgency</div>
+                        </div>
+                        <div class="connection-box">
+                            <div class="connection-title">→ To Section 3:</div>
+                            <div class="connection-text">Lays foundation for introducing formal framework (SCM, GIB)</div>
+                        </div>
+                        <div class="connection-box">
+                            <div class="connection-title">→ To Section 4:</div>
+                            <div class="connection-text">Justifies why enhanced GIB and contrastive learning are needed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preliminaries -->
+            <div class="module-card card-prelim">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <span>③ Preliminaries: Formalization Framework</span>
+                    <span class="card-toggle">▼</span>
+                </div>
+                <div class="card-body">
+                    <div class="content-section">
+                        <h3>🔷 Core Concept Definitions</h3>
+                        <div class="quote">
+                            <strong>Graph Decomposition:</strong> G = C ⊕ S (Causal subgraph + Confounding subgraph)<br/>
+                            <strong>Learnable Masks:</strong> M_edge ∈ [0,1]^{n×n}, M_node (diagonal matrix)
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>📐 Standard GIB Objective</h3>
+                        <div class="quote">
+                            <strong>L_GIB = −I(C; Y) + α·I(C; G)</strong><br/>
+                            Maximize predictive information I(C; Y) while minimizing redundancy I(C; G)
+                        </div>
+                        <p>Limitation: Assumes S is pure noise, S has no ability to predict Y</p>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>🔗 Setting Stage for Section 4 Innovation</h3>
+                        <div class="connection-box">
+                            <div class="connection-title">→ Section 4 Enhancement:</div>
+                            <div class="connection-text">Builds on this formula by adding −β·I(S; Y) term to explicitly model confounding predictive capacity</div>
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>🧮 Variational Bounds Approximation</h3>
+                        <p>By assuming Gaussian distributions, mutual information terms become computationally tractable loss functions:</p>
+                        <div class="quote">
+                            I(C; G) ≤ (1/2)E[‖μ_ϕ(G)‖²]<br/>
+                            I(C; Y) ≈ −(1/N)Σ(Y_i − μ^{(c)}_i)² (least squares loss)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Method -->
+            <div class="module-card card-method">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <span>④ Method Innovation: Enhanced GIB & Contrastive Learning</span>
+                    <span class="card-toggle">▼</span>
+                </div>
+                <div class="card-body">
+                    <div class="content-section">
+                        <h3>🟠 Innovation 1: Enhanced GIB Objective</h3>
+                        <div class="quote">
+                            <strong>L_GIB = −I(C; Y) + α·I(C; G) − β·I(S; Y)</strong>
+                        </div>
+                        <p>Key change: Adding <span class="highlight">−β·I(S; Y)</span> term to explicitly model confounding subgraph's predictive capacity</p>
+                        <ul>
+                            <li>No longer assumes S has no predictive power</li>
+                            <li>Avoids forcing all Y-relevant information into C</li>
+                            <li>Achieves more precise causal-confounding separation</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>🟠 Innovation 2: Contrastive Learning Causal Intervention</h3>
+                        <div class="quote">
+                            <strong>H_mix,ij = H_c,i + H_s,j</strong> (random pairing of confounding representations)<br/>
+                            Positive pairs: (H_g,i, H_mix,ij) (same causal subgraph)<br/>
+                            Negative pairs: other graph representations
+                        </div>
+                        <p>Advantages:</p>
+                        <ul>
+                            <li>✓ No discrete label information needed (suitable for regression)</li>
+                            <li>✓ Learns causally invariant representations (robust to confounding)</li>
+                            <li>✓ Avoids generated mixed graphs excessively discarding useful info</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>📊 Complete Loss Function</h3>
+                        <div class="quote">
+                            <strong>L = L_GIB + λ·L_CI</strong><br/>
+                            where L_CI is InfoNCE-style contrastive loss
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>🔗 Direct Inheritance & Breakthrough from Section 3</h3>
+                        <div class="connection-box">
+                            <div class="connection-title">Inheritance:</div>
+                            <div class="connection-text">Maintains GIB theoretical framework and mutual information calculation methods</div>
+                        </div>
+                        <div class="connection-box">
+                            <div class="connection-title">Breakthrough:</div>
+                            <div class="connection-text">Breaks "confounding=pure noise" assumption, adds critical predictive term</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experiments -->
+            <div class="module-card card-exp">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <span>⑤ Experiments: Multi-dimensional Performance Evaluation</span>
+                    <span class="card-toggle">▼</span>
+                </div>
+                <div class="card-body">
+                    <div class="content-section">
+                        <h3>🟢 Main Experimental Results</h3>
+                        <div class="quote">
+                            <strong>GOOD-ZINC Dataset:</strong><br/>
+                            • Scaffold Covariate: 42.2% ID improvement (0.0514 vs 0.0890 GSAT)<br/>
+                            • Size Concept: 44.4% OOD improvement<br/>
+                            • Significantly reduced variance indicates method stability
+                        </div>
+                        <div class="quote">
+                            <strong>ReactionOOD Benchmark:</strong><br/>
+                            • Best OOD performance in 6 out of 10 evaluation scenarios, second-best in 2<br/>
+                            • Competitive performance across Cycloaddition, RDB7, and E2&SN2
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>🟢 Ablation Study: Validating Two Innovations</h3>
+                        <div class="quote">
+                            <strong>Removing GIB term (ignoring confounding predictive power):</strong><br/>
+                            Notable OOD performance drop, validates necessity of enhanced GIB
+                        </div>
+                        <div class="quote">
+                            <strong>Removing CI term (contrastive learning intervention):</strong><br/>
+                            Larger degradation than removing GIB on most datasets, suggesting CI is dominant factor; GIB and CI are complementary
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>🟢 Generalizability Validation</h3>
+                        <p>Also effective on classification tasks (GOOD-Motif), proving method's general applicability</p>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>🔗 Causal Validation Relationship with Section 4</h3>
+                        <div class="connection-box">
+                            <div class="connection-title">Validation Target:</div>
+                            <div class="connection-text">Enhanced GIB loss and contrastive learning proposed in §4</div>
+                        </div>
+                        <div class="connection-box">
+                            <div class="connection-title">Validation Angles:</div>
+                            <div class="connection-text">Complete performance, ablation studies, OOD generalization, method generalizability</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="module-card card-conc">
+                <div class="card-header" onclick="toggleCard(this)">
+                    <span>⑥ Conclusion: Summary of Contributions & Academic Significance</span>
+                    <span class="card-toggle">▼</span>
+                </div>
+                <div class="card-body">
+                    <div class="content-section">
+                        <h3>🟡 Three Major Contributions</h3>
+                        <div class="quote">
+                            <strong>Contribution 1 (Conceptual):</strong> First to explicitly consider the predictive role of confounding features in graph regression tasks, a critical yet overlooked aspect in graph OOD generalization
+                        </div>
+                        <div class="quote">
+                            <strong>Contribution 2 (Technical):</strong> Introduce label-free contrastive learning causal intervention, breaking through label-dependent causal method limitations
+                        </div>
+                        <div class="quote">
+                            <strong>Contribution 3 (Empirical):</strong> Large-scale experiments demonstrate significant OOD generalization improvement (42%+)
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>🟡 Academic Significance</h3>
+                        <ul>
+                            <li><strong>Theoretical:</strong> Improves understanding of confounding effects, proposes causal framework for continuous outputs</li>
+                            <li><strong>Methodological:</strong> Novel application of contrastive learning in causal learning</li>
+                            <li><strong>Applied:</strong> Enhances accuracy in molecular property prediction, chemical reaction kinetics prediction, etc.</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>🔗 Overall Relationship with Entire Paper</h3>
+                        <div class="connection-box">
+                            <div class="connection-title">Problem Source (Sections 1-2):</div>
+                            <div class="connection-text">Classification vs regression gap, inadequate confounding handling</div>
+                        </div>
+                        <div class="connection-box">
+                            <div class="connection-title">Theoretical Foundation (Section 3):</div>
+                            <div class="connection-text">Formalization of GIB, mutual information, SCM</div>
+                        </div>
+                        <div class="connection-box">
+                            <div class="connection-title">Innovative Solution (Section 4):</div>
+                            <div class="connection-text">Two major innovations: enhanced GIB + contrastive learning</div>
+                        </div>
+                        <div class="connection-box">
+                            <div class="connection-title">Experimental Confirmation (Section 5):</div>
+                            <div class="connection-text">SOTA performance, ablation studies, generalization validation</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Analysis -->
+        <div class="detailed-analysis">
+            <h2 class="section-title">🔍 Deep Inter-relationship Analysis</h2>
+            <div class="analysis-grid">
+                <div class="analysis-card">
+                    <h4>Introduction ↔ Related Work</h4>
+                    <p><strong>Key Connection:</strong> The former asks "why" (why confounding handling fails), the latter answers "how existing methods do it," providing evidence for problem severity.</p>
+                </div>
+                <div class="analysis-card">
+                    <h4>Related Work ↔ Preliminaries</h4>
+                    <p><strong>Key Connection:</strong> The former identifies shortcomings of existing methods, the latter provides formal theoretical tools (GIB, mutual information) to analyze root causes of these shortcomings.</p>
+                </div>
+                <div class="analysis-card">
+                    <h4>Preliminaries ↔ Method</h4>
+                    <p><strong>Key Connection:</strong> The former defines standard GIB and its limitations, the latter enhances and improves based on this theoretical framework—a "patch" style innovation.</p>
+                </div>
+                <div class="analysis-card">
+                    <h4>Method ↔ Experiments</h4>
+                    <p><strong>Key Connection:</strong> The former proposes two loss functions L_GIB and L_CI, the latter validates their effectiveness one by one through comprehensive experiments and ablation studies.</p>
+                </div>
+                <div class="analysis-card">
+                    <h4>Experiments ↔ Conclusion</h4>
+                    <p><strong>Key Connection:</strong> The former provides data evidence (42% improvement, SOTA performance, ablation results), the latter summarizes these achievements into three contribution claims.</p>
+                </div>
+                <div class="analysis-card">
+                    <h4>Paper Mainline: Confounding Effects</h4>
+                    <p><strong>Central Thread:</strong> Confounding effects evolve from "overlooked problem" → "theoretical analysis" → "concrete solution" → "experimental validation" → "academic contribution".</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <h3>🎨 Module Color Coding & Meanings</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);"></div>
+                    <div class="legend-text"><strong>Introduction (Problem)</strong><br/>Problem identification & motivation</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #4ECDC4 0%, #45B7B8 100%);"></div>
+                    <div class="legend-text"><strong>Related Work (Survey)</strong><br/>Literature review & analysis</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #45B7D1 0%, #3FA7C1 100%);"></div>
+                    <div class="legend-text"><strong>Preliminaries (Foundation)</strong><br/>Formal definitions & framework</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #FFA07A 0%, #FF8C66 100%);"></div>
+                    <div class="legend-text"><strong>Method (Innovation)</strong><br/>Core algorithm & optimization</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #98D8C8 0%, #80C8B8 100%);"></div>
+                    <div class="legend-text"><strong>Experiments (Validation)</strong><br/>Performance evaluation & analysis</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #F7DC6F 0%, #EFC94A 100%);"></div>
+                    <div class="legend-text"><strong>Conclusion (Summary)</strong><br/>Contribution claims & significance</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📄 Paper: A Recipe for Causal Graph Regression: Confounding Effects Revisited | ICML 2025</p>
+            <p>🔗 GitHub: https://github.com/causal-graph/CGR</p>
         </div>
     </div>
 
     <script>
-        const nodeData = {
-            a1: {
-                title: "Assumption 1: Boundedness",
-                type: "Assumption",
-                text: `"Assume ∫y²dρ < ∞ and the Bernstein noise condition holds with constants M and γ."
-
-This is the <em>Bernstein noise assumption</em>, which is satisfied for bounded, Gaussian, and sub-Gaussian noise.`,
-                connections: [
-                    {to: "l1", desc: "Required for optimal learning rates"},
-                    {to: "p1", desc: "Used in spectral property proof"}
-                ],
-                usedBy: ["Lemma 1", "Lemma 2", "Proposition 1", "All proof lemmas"]
-            },
-            a2: {
-                title: "Assumption 2: Regularity",
-                type: "Assumption",
-                text: `"For r > 0, assume f_ρ = L_K^r h_ρ for some h_ρ ∈ L²_ρX"
-
-This describes the <em>regularity of the regression function</em>. Larger r implies better regularity. When r ≥ 1/2, f ∈ H_K; when r < 1/2, f ∉ H_K.`,
-                connections: [
-                    {to: "l1", desc: "Determines optimal convergence rate"},
-                    {to: "p1", desc: "Affects subdivision analysis"},
-                    {to: "t1", desc: "Rate depends on r: |D|^(-r/(2r+s))"}
-                ],
-                usedBy: ["Lemma 1", "Proposition 1", "Theorem 1"]
-            },
-            a3: {
-                title: "Assumption 3: Effective Dimension",
-                type: "Assumption",
-                text: `"There exists s ∈ (0,1] such that N(λ) ≤ C₀λ^(-s)"
-
-This is the <em>capacity assumption</em> measured by the effective dimension N(λ) = Tr((λI + L_K)^(-1)L_K).`,
-                connections: [
-                    {to: "l1", desc: "Determines capacity-dependent rate"},
-                    {to: "d1", desc: "Used in ASUS stopping criterion"}
-                ],
-                usedBy: ["Lemma 1", "Definition 1 (ASUS)"]
-            },
-            l1: {
-                title: "Lemma 1: Optimal KRR Rates",
-                type: "Lemma",
-                text: `"With λ* = c₀|D|^(-1/(2r+s)), with confidence 1-δ:
-‖f_{D,λ*} - f_ρ‖_ρ ≤ C̃|D|^(-r/(2r+s)) log(2/δ)"
-
-This establishes the <em>optimal learning rates</em> that KRR can achieve when the regularization parameter is appropriately selected. This serves as the <em>benchmark</em> for the paper.`,
-                connections: [
-                    {to: "t1", desc: "ASUS achieves same rate (Theorem 1)"},
-                    {to: "l2", desc: "LP only achieves near-optimal (log log factor)"}
-                ],
-                usedBy: ["Comparison benchmark in Theorem 1"]
-            },
-            l2: {
-                title: "Lemma 2: Lepskii Principle Rates",
-                type: "Lemma",
-                text: `"With LP parameter selection:
-‖f_{D,λ_LP} - f_ρ‖_ρ ≤ C̃|D|^(-r/(2r+s)) (log log |D|) log(2/δ)"
-
-The <em>double logarithmic factor</em> shows LP achieves only <em>near-optimal</em> rates. This is the <em>gap</em> that motivates the paper's contribution.`,
-                connections: [
-                    {to: "d1", desc: "ASUS designed to remove this gap"},
-                    {to: "t1", desc: "ASUS removes log log factor"}
-                ],
-                usedBy: ["Motivation for ASUS development"]
-            },
-            p1: {
-                title: "Proposition 1: Spectral Property",
-                type: "Proposition",
-                text: `"For λ_k = 1/(bk), the key bound becomes:
-‖(L_{K,D}+λ_k)^(1/2)(f_{D,λ_k} - f_{D,λ_{k+1}})‖_K ≤ C̄₁ b λ_k (W_{D,λ_k} + λ_k^r)"
-
-The <em>crucial insight</em>: delicate subdivision (uniform vs logarithmic) adds an extra λ_k factor, enabling optimal rates. This is <em>unique to KRR</em>'s spectral structure.`,
-                connections: [
-                    {to: "d1", desc: "Enables ASUS stopping criterion"},
-                    {to: "pl3", desc: "Proof uses Lemma 3 bounds"}
-                ],
-                usedBy: ["Definition 1 (ASUS)", "Proof section"]
-            },
-            d1: {
-                title: "Definition 1: ASUS",
-                type: "Definition",
-                text: `"<em>Adaptive Selection with Uniform Subdivision (ASUS)</em>:
-For λ_k = 1/(bk), define k̂_uni as the first k satisfying:
-‖(L_{K,D}+λ_{k-1})^(1/2)(f_{λ_k,D} - f_{λ_{k-1},D})‖_K ≥ C_US W_{D,λ_k} log²(8/δ)"
-
-Key advantages:
-1. <em>Early-stopping</em> type (no pairwise comparisons)
-2. <em>Uniform subdivision</em> exploits spectral property`,
-                connections: [
-                    {to: "t1", desc: "Achieves optimal rates"},
-                    {to: "p1", desc: "Built on spectral property insight"}
-                ],
-                usedBy: ["Theorem 1 (main result)"]
-            },
-            t1: {
-                title: "Theorem 1: ASUS Optimality (MAIN RESULT)",
-                type: "Theorem",
-                text: `"Under Assumptions 1-3, with confidence 1-δ:
-‖f_{D,λ̂_uni} - f_ρ‖_ρ ≤ C₁|D|^(-r/(2r+s)) log⁴(8/δ)
-‖f_{D,λ̂_uni} - f_ρ‖_K ≤ C₁|D|^(-r-1/2)/(2r+s)) log⁴(8/δ)"
-
-<em>ASUS achieves OPTIMAL learning rates</em>, better than:
-• Discrepancy principle
-• Balancing principle  
-• Lepskii principle`,
-                connections: [
-                    {to: "l1", desc: "Matches optimal rate from Lemma 1"},
-                    {to: "pl5", desc: "Proof combines Lemma 5 (small λ)"},
-                    {to: "pl6", desc: "...and Lemma 6 (large λ)"}
-                ],
-                usedBy: ["Main contribution of the paper"]
-            },
-            pl3: {
-                title: "Lemma 3: Operator Bounds",
-                type: "Proof Lemma",
-                text: `"Bounds for key operators:
-• S_{D,λ} ≤ C₁* (log N(λ)/(λ|D|) + √(...))
-• Q_{D,λ} ≤ √2
-• P_{D,λ} ≤ 16(κM+γ) W_{D,λ} log²(8/δ)"
-
-These <em>technical bounds</em> on the integral operators are essential for the proofs.`,
-                connections: [
-                    {to: "p1", desc: "Used in Proposition 1 proof"}
-                ],
-                usedBy: ["Proof of Proposition 1"]
-            },
-            pl4: {
-                title: "Lemma 4: Error Decomposition",
-                type: "Proof Lemma",
-                text: `"For any λ ≥ λ_{K*}:
-max{λ^(1/2)‖f_{D,λ}-f_ρ‖_K, ‖f_{D,λ}-f_ρ‖_ρ} 
-≤ 2^(r-1/2) λ^r ‖h_ρ‖_ρ + 32(κM+γ) W_{D,λ} log²(8/δ)"
-
-Standard <em>bias-variance decomposition</em> for KRR error.`,
-                connections: [
-                    {to: "pl5", desc: "Used in small λ case"},
-                    {to: "t1", desc: "Foundation for Theorem 1 proof"}
-                ],
-                usedBy: ["Lemma 5", "Theorem 1 proof"]
-            },
-            pl5: {
-                title: "Lemma 5: Small λ Case",
-                type: "Proof Lemma",
-                text: `"If λ̂_uni ≤ λ*, then:
-‖f_{D,λ̂_uni} - f_ρ‖_ρ ≤ C̄₂|D|^(-r/(2r+s)) log²(8/δ)"
-
-Handles the case when ASUS selects a parameter <em>smaller than optimal</em>.`,
-                connections: [
-                    {to: "t1", desc: "Combined with Lemma 6 for Theorem 1"}
-                ],
-                usedBy: ["Theorem 1 proof"]
-            },
-            pl6: {
-                title: "Lemma 6: Large λ Case",
-                type: "Proof Lemma",
-                text: `"If λ̂_uni > λ*, then:
-‖f_{D,λ̂_uni} - f_ρ‖_ρ ≤ C̄₅|D|^(-r/(2r+s)) log⁴(8/δ)"
-
-Handles the case when ASUS selects a parameter <em>larger than optimal</em>. Uses triangle inequality and telescoping sum.`,
-                connections: [
-                    {to: "t1", desc: "Combined with Lemma 5 for Theorem 1"}
-                ],
-                usedBy: ["Theorem 1 proof"]
-            }
-        };
-
-        let selectedNode = null;
-
-        function selectNode(id) {
-            // Clear previous selection
-            document.querySelectorAll('.node-circle').forEach(c => c.classList.remove('selected'));
-            document.querySelectorAll('.edge').forEach(e => {
-                e.classList.remove('highlighted');
-                e.setAttribute('marker-end', 'url(#arrowhead)');
+        function toggleCard(header) {
+            const body = header.nextElementSibling;
+            const toggle = header.querySelector('.card-toggle');
+            
+            // Close all other cards
+            document.querySelectorAll('.card-body.open').forEach(el => {
+                if (el !== body) {
+                    el.classList.remove('open');
+                    el.previousElementSibling.querySelector('.card-toggle').classList.remove('open');
+                }
             });
             
-            // Highlight selected node
-            const node = document.querySelector(`[data-id="${id}"] .node-circle`);
-            if (node) node.classList.add('selected');
+            // Toggle current card
+            body.classList.toggle('open');
+            toggle.classList.toggle('open');
+        }
+
+        function highlightModule(module) {
+            // Add highlight effect
+            const nodes = document.querySelectorAll('.module-node');
+            nodes.forEach(node => {
+                node.style.opacity = '0.5';
+            });
             
-            // Highlight connected edges
-            const data = nodeData[id];
-            if (data && data.connections) {
-                data.connections.forEach(conn => {
-                    const edge = document.getElementById(`edge-${id}-${conn.to}`);
-                    if (edge) {
-                        edge.classList.add('highlighted');
-                        edge.setAttribute('marker-end', 'url(#arrowhead-gold)');
-                    }
+            // Restore corresponding node
+            setTimeout(() => {
+                nodes.forEach(node => {
+                    node.style.opacity = '1';
                 });
-            }
-            
-            // Update detail panel
-            updateDetailPanel(id);
-            selectedNode = id;
+            }, 300);
         }
 
-        function updateDetailPanel(id) {
-            const data = nodeData[id];
-            if (!data) return;
-            
-            document.getElementById('detail-title').textContent = data.title;
-            
-            let html = `
-                <div class="detail-section">
-                    <h4>Text Excerpt</h4>
-                    <div class="detail-text">${data.text}</div>
-                </div>
-            `;
-            
-            if (data.connections && data.connections.length > 0) {
-                html += `
-                    <div class="detail-section">
-                        <h4>Connects To</h4>
-                        <ul class="connections-list">
-                            ${data.connections.map(c => `
-                                <li onclick="selectNode('${c.to}')">
-                                    <span class="arrow">→</span>
-                                    <span><strong>${nodeData[c.to]?.title.split(':')[0] || c.to}</strong>: ${c.desc}</span>
-                                </li>
-                            `).join('')}
-                        </ul>
-                    </div>
-                `;
+        // Open first card by default
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstCard = document.querySelector('.card-body');
+            const firstToggle = document.querySelector('.card-toggle');
+            if (firstCard && firstToggle) {
+                firstCard.classList.add('open');
+                firstToggle.classList.add('open');
             }
-            
-            if (data.usedBy) {
-                html += `
-                    <div class="detail-section">
-                        <h4>Used By</h4>
-                        <div class="detail-text">${Array.isArray(data.usedBy) ? data.usedBy.join(', ') : data.usedBy}</div>
-                    </div>
-                `;
-            }
-            
-            document.getElementById('detail-content').innerHTML = html;
-        }
-
-        // Initialize with main theorem selected
-        selectNode('t1');
+        });
     </script>
 </body>
 </html>

@@ -1,4 +1,6 @@
-PhDagentSpring2026/moodle/task3.1/visual.html
+<!-- PhDagentSpring2026/moodle/task3.1/visual.html -->
+
+/Users/yinyujia/Documents/mccpSpring2026/moodle/task3.1/visual.html
 
 this version looks promising but I expect sth that shows the interrelationship among different modules of the paper not just a linear and hierarhichal presentation
 

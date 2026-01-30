@@ -3,303 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Structure: Adaptive Parameter Selection for Kernel Ridge Regression</title>
+    <title>A Recipe for Causal Graph Regression - Paper Structure</title>
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
             min-height: 100vh;
-            padding: 20px;
         }
+        
         .container {
             max-width: 900px;
             margin: 0 auto;
-        }
-        .paper-title {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 20px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-        .paper-title h1 {
-            color: #2d3748;
-            font-size: 1.6em;
-            margin-bottom: 10px;
-        }
-        .paper-title .author {
-            color: #718096;
-            font-size: 0.95em;
-        }
-        .keywords {
-            background: #f7fafc;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-top: 15px;
-            display: inline-block;
-        }
-        .keywords span {
-            background: #667eea;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            margin: 3px;
-            display: inline-block;
-        }
-        .section {
-            background: white;
-            border-radius: 12px;
-            margin-bottom: 15px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
-        .section-header {
-            padding: 18px 25px;
-            font-weight: 600;
-            font-size: 1.1em;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .section-num {
-            background: #667eea;
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9em;
+            padding: 40px 30px;
+            text-align: center;
         }
-        .section-title {
-            color: #2d3748;
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            font-weight: 700;
         }
-        .section-content {
-            padding: 0 25px 20px 25px;
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            font-style: italic;
         }
-        .subsection {
-            background: #f8fafc;
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
             border-left: 4px solid #667eea;
-            padding: 12px 15px;
-            margin: 8px 0;
-            border-radius: 0 8px 8px 0;
+            padding-left: 15px;
         }
-        .subsection.assumption {
-            border-left-color: #48bb78;
-        }
-        .subsection.lemma {
-            border-left-color: #ed8936;
-        }
-        .subsection.proposition {
-            border-left-color: #9f7aea;
-        }
-        .subsection.definition {
-            border-left-color: #38b2ac;
-        }
-        .subsection.theorem {
-            border-left-color: #e53e3e;
-        }
-        .subsection-label {
-            font-size: 0.75em;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-        .assumption .subsection-label { color: #48bb78; }
-        .lemma .subsection-label { color: #ed8936; }
-        .proposition .subsection-label { color: #9f7aea; }
-        .definition .subsection-label { color: #38b2ac; }
-        .theorem .subsection-label { color: #e53e3e; }
-        .subsection-title {
-            color: #4a5568;
-            font-weight: 500;
-        }
-        .legend {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        .legend h3 {
-            color: #2d3748;
+        
+        .subsection {
+            margin-left: 20px;
             margin-bottom: 12px;
-            font-size: 1em;
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            border-left: 3px solid #764ba2;
+            border-radius: 4px;
         }
-        .legend-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
+        
+        .subsection h3 {
+            color: #764ba2;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 5px;
         }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85em;
-        }
-        .legend-color {
-            width: 20px;
-            height: 4px;
-            border-radius: 2px;
-        }
-        .abstract-box {
-            background: #edf2f7;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            font-size: 0.9em;
-            color: #4a5568;
+        
+        .subsection ul {
+            list-style-position: inside;
+            color: #555;
+            font-size: 0.95em;
             line-height: 1.6;
+        }
+        
+        .subsection ul li {
+            margin-left: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .toc {
+            background-color: #f0f4ff;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .toc h2 {
+            color: #667eea;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+        }
+        
+        .toc ol {
+            color: #555;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+        
+        .toc li {
+            margin-bottom: 8px;
+        }
+        
+        .key-info {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .key-info strong {
+            color: #856404;
+        }
+        
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            border-top: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Paper Title -->
-        <div class="paper-title">
-            <h1>Adaptive Parameter Selection for Kernel Ridge Regression</h1>
-            <p class="author">Shao-Bo Lin</p>
-            <p class="author" style="font-size:0.85em; margin-top:5px;">Xi'an Jiaotong University</p>
-            <div class="keywords">
-                <span>Learning Theory</span>
-                <span>Kernel Ridge Regression</span>
-                <span>Parameter Selection</span>
-                <span>Lepskii Principle</span>
-            </div>
+        <div class="header">
+            <h1>A Recipe for Causal Graph Regression</h1>
+            <p>Confounding Effects Revisited</p>
         </div>
-
-        <!-- Section 1: Introduction -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-num">1</div>
-                <span class="section-title">Introduction</span>
+        
+        <div class="content">
+            <div class="key-info">
+                <strong>Paper Source:</strong> ICML 2025 - Authors: Yujia Yin, Tianyi Qu, Zihao Wang, Yifan Chen
             </div>
-            <div class="section-content">
-                <div class="abstract-box">
-                    Discusses the theoretical background of KRR, existing parameter selection approaches (Hold-out, Discrepancy Principle, Lepskii Principle), and motivates the need for an early-stopping type parameter selection strategy.
-                </div>
+            
+            <div class="toc">
+                <h2>📋 Paper Structure Overview</h2>
+                <ol>
+                    <li><strong>Introduction</strong> - Addressing Causal Graph Regression</li>
+                    <li><strong>Related Work</strong> - OOD Challenges and Existing Approaches</li>
+                    <li><strong>Preliminaries and Notations</strong> - Fundamental Concepts</li>
+                    <li><strong>Revisiting Confounding Effects for CGR</strong> - Core Methodology</li>
+                    <li><strong>Experiments</strong> - Evaluation and Results</li>
+                    <li><strong>Conclusion</strong> - Summary and Impact</li>
+                </ol>
             </div>
-        </div>
-
-        <!-- Section 2: KRR and Parameter Selection -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-num">2</div>
-                <span class="section-title">Kernel Ridge Regression and Parameter Selection</span>
-            </div>
-            <div class="section-content">
-                <div class="subsection assumption">
-                    <div class="subsection-label">Assumption 1</div>
-                    <div class="subsection-title">Boundedness (Bernstein noise assumption)</div>
-                </div>
-                <div class="subsection assumption">
-                    <div class="subsection-label">Assumption 2</div>
-                    <div class="subsection-title">Regularity (of regression function)</div>
-                </div>
-                <div class="subsection assumption">
-                    <div class="subsection-label">Assumption 3</div>
-                    <div class="subsection-title">Effective Dimension (capacity assumption)</div>
-                </div>
-                <div class="subsection lemma">
-                    <div class="subsection-label">Lemma 1</div>
-                    <div class="subsection-title">Optimal Learning Rates of KRR</div>
-                </div>
-                <div class="subsection lemma">
-                    <div class="subsection-label">Lemma 2</div>
-                    <div class="subsection-title">Learning Rates of KRR with Lepskii Principle</div>
+            
+            <div class="section">
+                <h2>1. Introduction</h2>
+                <div class="subsection">
+                    <h3>Main Topic</h3>
+                    <ul>
+                        <li>Causal Graph Learning (CGL) in Classification vs. Regression</li>
+                        <li>Challenges of extending CGL to regression tasks</li>
+                        <li>Importance of understanding confounding effects in graph regression</li>
+                    </ul>
                 </div>
             </div>
-        </div>
-
-        <!-- Section 3: Adaptive Parameter Selection -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-num">3</div>
-                <span class="section-title">Adaptive Parameter Selection for KRR</span>
-            </div>
-            <div class="section-content">
-                <div class="subsection proposition">
-                    <div class="subsection-label">Proposition 1</div>
-                    <div class="subsection-title">Spectral Property of KRR (role of subdivision)</div>
-                </div>
-                <div class="subsection definition">
-                    <div class="subsection-label">Definition 1</div>
-                    <div class="subsection-title">ASUS: Adaptive Selection with Uniform Subdivision</div>
-                </div>
-                <div class="subsection theorem">
-                    <div class="subsection-label">Theorem 1</div>
-                    <div class="subsection-title">Optimality of ASUS (Main Result)</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section 4: Proofs -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-num">4</div>
-                <span class="section-title">Proofs</span>
-            </div>
-            <div class="section-content">
-                <div class="subsection lemma">
-                    <div class="subsection-label">Lemma 3</div>
-                    <div class="subsection-title">Bounds for Q, S, P operators and effective dimension</div>
+            
+            <div class="section">
+                <h2>2. Related Work</h2>
+                <div class="subsection">
+                    <h3>Out-of-Distribution (OOD) Challenges in Graph Learning</h3>
+                    <ul>
+                        <li>Approaches categorized into: Invariant Learning, Causal Modeling, Stable Learning</li>
+                    </ul>
                 </div>
                 <div class="subsection">
-                    <div class="subsection-label" style="color:#667eea;">Proof</div>
-                    <div class="subsection-title">Proof of Proposition 1</div>
-                </div>
-                <div class="subsection lemma">
-                    <div class="subsection-label">Lemma 4</div>
-                    <div class="subsection-title">Error Decomposition for KRR</div>
-                </div>
-                <div class="subsection lemma">
-                    <div class="subsection-label">Lemma 5</div>
-                    <div class="subsection-title">Error bound when selected parameter is small</div>
-                </div>
-                <div class="subsection lemma">
-                    <div class="subsection-label">Lemma 6</div>
-                    <div class="subsection-title">Error bound when selected parameter is large</div>
+                    <h3>Invariant Learning</h3>
+                    <ul>
+                        <li>Identifying features stable across environments</li>
+                        <li>Methods: CIGA, GSAT, GALA</li>
+                    </ul>
                 </div>
                 <div class="subsection">
-                    <div class="subsection-label" style="color:#667eea;">Proof</div>
-                    <div class="subsection-title">Proof of Theorem 1 (Main Theorem)</div>
+                    <h3>Causal Modeling</h3>
+                    <ul>
+                        <li>Leveraging Structural Causal Models (SCMs)</li>
+                        <li>Techniques: Backdoor adjustment, Frontdoor adjustment, Instrumental variables</li>
+                        <li>Limitations in regression settings</li>
+                    </ul>
                 </div>
+                <div class="subsection">
+                    <h3>Stable Learning</h3>
+                    <ul>
+                        <li>Consistent performance across environments</li>
+                        <li>Sample reweighting and covariate distribution balancing</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>3. Preliminaries and Notations</h2>
+                <div class="subsection">
+                    <h3>Causal Graph Learning</h3>
+                    <ul>
+                        <li>Graph decomposition: G = C ⊕ S (Causal + Confounding subgraphs)</li>
+                        <li>Learnable soft masks for graph filtering</li>
+                        <li>Mutual Information computation</li>
+                    </ul>
+                </div>
+                <div class="subsection">
+                    <h3>Graph Information Bottleneck (GIB)</h3>
+                    <ul>
+                        <li>Balancing information preservation and compression</li>
+                        <li>Minimizing I(C; G) while maximizing I(C; Y)</li>
+                        <li>Identifying causally relevant subgraphs</li>
+                    </ul>
+                </div>
+                <div class="subsection">
+                    <h3>Causal Intervention in GNNs</h3>
+                    <ul>
+                        <li>Structural Causal Model (SCM) representation</li>
+                        <li>Backdoor adjustment principle</li>
+                        <li>Addressing spurious correlations (S)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>4. Revisiting Confounding Effects for CGR</h2>
+                <div class="subsection">
+                    <h3>Overview</h3>
+                    <ul>
+                        <li>Framework combining Enhanced GIB with Causal Discovery</li>
+                        <li>GNN-based encoder for graph embeddings</li>
+                        <li>Attention modules for soft mask generation</li>
+                        <li>Contrastive Learning integration</li>
+                    </ul>
+                </div>
+                <div class="subsection">
+                    <h3>Enhanced GIB Objective</h3>
+                    <ul>
+                        <li>Reconsidering predictive power of confounding subgraphs</li>
+                        <li>Extended GIB loss: -I(C; Y) + αI(C; G) - βI(S; Y)</li>
+                        <li>Variational bounds for I(C; G), I(C; Y), and I(S; Y)</li>
+                        <li>Practical computation using Gaussian distributions</li>
+                    </ul>
+                </div>
+                <div class="subsection">
+                    <h3>Causal Intervention</h3>
+                    <ul>
+                        <li>Random addition method for counterfactual graphs</li>
+                        <li>Contrastive learning-based causal intervention loss</li>
+                        <li>Alignment of original and mixed graph representations</li>
+                        <li>InfoNCE loss formulation</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>5. Experiments</h2>
+                <div class="subsection">
+                    <h3>Datasets</h3>
+                    <ul>
+                        <li><strong>GOOD-ZINC:</strong> Molecular property regression with 4 OOD types</li>
+                        <li><strong>ReactionOOD-SOOD:</strong> Three S-OOD datasets (Cycloaddition, E2&SN2, RDB7)</li>
+                    </ul>
+                </div>
+                <div class="subsection">
+                    <h3>Baselines and Setup</h3>
+                    <ul>
+                        <li>Euclidean OOD methods: IRM, VREx, GroupDRO, DANN, CORAL, Mixup</li>
+                        <li>Graph OOD methods: CIGA, GSAT, DIR</li>
+                        <li>Consistent architectures across all methods</li>
+                        <li>Three repetitions with different random seeds</li>
+                    </ul>
+                </div>
+                <div class="subsection">
+                    <h3>Results of GOOD</h3>
+                    <ul>
+                        <li>State-of-the-art (SOTA) performance on GOOD-ZINC</li>
+                        <li>42.2% improvement over GSAT in Scaffold Covariate (ID)</li>
+                        <li>Significant improvements across both ID and OOD settings</li>
+                        <li>Reduced variance indicating stability</li>
+                    </ul>
+                </div>
+                <div class="subsection">
+                    <h3>Results of ReactionOOD</h3>
+                    <ul>
+                        <li>Best OOD performance in 6 out of 10 cases</li>
+                        <li>Second-best in 2 cases with minimal performance gaps</li>
+                        <li>Robust generalization across multiple datasets</li>
+                        <li>Consistent outperformance of causal methods like CIGA</li>
+                    </ul>
+                </div>
+                <div class="subsection">
+                    <h3>Effectiveness in Classification Task</h3>
+                    <ul>
+                        <li>Ablation studies on GOOD-Motif dataset</li>
+                        <li>Validation of confounding predictive power assumption</li>
+                        <li>Effectiveness of contrastive learning approach</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>6. Conclusion</h2>
+                <div class="subsection">
+                    <h3>Key Contributions</h3>
+                    <ul>
+                        <li>First explicit consideration of predictive role of confounding features</li>
+                        <li>New causal intervention approach using contrastive learning</li>
+                        <li>Improved OOD generalization for graph regression tasks</li>
+                        <li>Enhanced understanding of confounding effects in CGL</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="key-info">
+                <strong>📊 Key Innovation:</strong> Extended GIB loss that considers the predictive capacity of both causal and confounding subgraphs, combined with contrastive learning for robust causal intervention without relying on discrete label information.
             </div>
         </div>
-
-        <!-- Legend -->
-        <div class="legend">
-            <h3>Legend</h3>
-            <div class="legend-items">
-                <div class="legend-item">
-                    <div class="legend-color" style="background:#48bb78;"></div>
-                    <span>Assumption</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background:#ed8936;"></div>
-                    <span>Lemma</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background:#9f7aea;"></div>
-                    <span>Proposition</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background:#38b2ac;"></div>
-                    <span>Definition</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background:#e53e3e;"></div>
-                    <span>Theorem</span>
-                </div>
-            </div>
+        
+        <div class="footer">
+            <p>Generated from: "A Recipe for Causal Graph Regression: Confounding Effects Revisited"</p>
+            <p>ICML 2025 | <a href="https://github.com/causal-graph/CGR" style="color: #667eea; text-decoration: none;">GitHub Repository</a></p>
         </div>
     </div>
 </body>
