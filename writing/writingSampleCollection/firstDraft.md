@@ -69,8 +69,7 @@ Our taxonomy shows that the three groups of methods provide different but relate
   This approach is fully serology driven. The geometry exists only where measurements exist, and thus the model is transductive. A newly observed sequence cannot be positioned until its titers are measured.
 
   \paragraph{Phylogeny informed geometric interpolation}
-
-  Neher et al.\ observed that antigenic differences learned from HI titers follow an additive structure along the phylogenetic tree of hemagglutinin \cite{neher2016prediction}. For a test virus $a$ and an antiserum $\beta$ raised against reference virus $b$, the standardized log titer is modeled as
+  Neher et al. observed that antigenic differences learned from HI titers follow an additive structure along the phylogenetic tree of hemagglutinin \cite{neher2016prediction}. For a test virus $a$ and an antiserum $\beta$ raised against reference virus $b$, the standardized log titer is modeled as
   \[
   \widehat{H}_{a\beta}
   =
@@ -213,4 +212,4 @@ Our taxonomy shows that the three groups of methods provide different but relate
 
 ## Notes
 
-[Any additional notes about your draft, challenges you faced, questions you have, etc.]
+

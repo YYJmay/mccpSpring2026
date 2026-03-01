@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Recipe for Causal Graph Regression — Presentation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+:root {
+  --color-primary: #1B4942;
+  --color-text: #1a1a2e;
+  --color-bg: #FFFFFF;
+  --color-bg-alt: #F8FAF4;
+  --color-accent-light: #E8F0ED;
+  --color-causal: #27ae60;
+  --color-causal-bg: #eafaf1;
+  --color-confounding: #e74c3c;
+  --color-confounding-bg: #fdedec;
+  --color-highlight: #f39c12;
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  padding: 5vh 10vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+  background: var(--color-bg);
+}
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.slide-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2.4rem, 4.2vw, 3.6rem);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 1.5rem;
+  line-height: 1.15;
+}
+.slide-title-main {
+  font-family: var(--font-heading);
+  font-size: clamp(2.8rem, 5vw, 4rem);
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.1;
+  margin-bottom: 0.6rem;
+}
+.slide-subtitle {
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+  color: #555;
+  font-weight: 300;
+  margin-bottom: 0.8rem;
+}
+.slide-meta {
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
+  color: #888;
+  margin-top: 0.6rem;
+}
+.body-text, .slide ul {
+  font-size: clamp(1.25rem, 1.8vw, 1.55rem);
+  line-height: 1.65;
+}
+.slide ul {
+  list-style: none;
+  padding: 0;
+}
+.slide ul li {
+  padding: 0.5rem 0;
+  padding-left: 1.6em;
+  position: relative;
+}
+.slide ul li::before {
+  content: '\25B8';
+  position: absolute;
+  left: 0;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.slide ul li.causal::before { color: var(--color-causal); }
+.slide ul li.confounding::before { color: var(--color-confounding); }
+
+.rubric-tag {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.15em 0.6em;
+  border-radius: 3px;
+  margin-right: 0.4em;
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.rubric-tag.content { background: #e8f0ed; color: #1B4942; }
+.rubric-tag.delivery { background: #fef3e2; color: #b8860b; }
+.rubric-tag.visual { background: #e8ecf4; color: #2c3e7a; }
+.rubric-tag.language { background: #f3e8f4; color: #6b2c7a; }
+.rubric-tag.evidence { background: #e2f0fe; color: #1a5276; }
+.rubric-tag.writing { background: #fce4ec; color: #8b1a2b; }
+
+.transition-cue {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  font-style: italic;
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+  color: var(--color-primary);
+}
+.transition-cue::before { content: '\2192 '; }
+
+.callout {
+  background: var(--color-accent-light);
+  border-left: 4px solid var(--color-primary);
+  padding: 1.2rem 1.6rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+  font-size: clamp(1.15rem, 1.6vw, 1.4rem);
+}
+.callout.causal {
+  background: var(--color-causal-bg);
+  border-left-color: var(--color-causal);
+}
+.callout.confounding {
+  background: var(--color-confounding-bg);
+  border-left-color: var(--color-confounding);
+}
+
+.slide-number {
+  position: absolute;
+  bottom: 1.2rem;
+  right: 2rem;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+#progress-bar {
+  position: fixed;
+  bottom: 0; left: 0;
+  height: 4px;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+  z-index: 1000;
+}
+
+.timer {
+  position: absolute;
+  top: 1.2rem;
+  right: 2rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+  user-select: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.timer:hover { opacity: 1; }
+.timer.warning { color: var(--color-highlight); }
+.timer.danger { color: var(--color-confounding); }
+
+#toolbar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  background: rgba(27, 73, 66, 0.95);
+  color: #fff;
+  padding: 0.6rem 2rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  z-index: 2000;
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+  font-size: 0.9rem;
+}
+#toolbar.visible { transform: translateY(0); }
+#toolbar button {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 0.4em 1em;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  transition: background 0.2s;
+}
+#toolbar button:hover { background: rgba(255,255,255,0.3); }
+.toolbar-label { font-weight: 600; margin-right: 0.5rem; }
+.edit-indicator {
+  margin-left: auto;
+  padding: 0.3em 0.8em;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+.edit-indicator.on { background: var(--color-causal); }
+.edit-indicator.off { background: rgba(255,255,255,0.15); }
+
+.diagram-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+.diagram-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: clamp(85px, 9vw, 115px);
+  height: clamp(85px, 9vw, 115px);
+  border-radius: 50%;
+  font-size: clamp(0.8rem, 1.05vw, 1rem);
+  font-weight: 600;
+  text-align: center;
+  padding: 0.5rem;
+  line-height: 1.2;
+}
+.diagram-node.causal {
+  background: var(--color-causal-bg);
+  border: 3px solid var(--color-causal);
+  color: #1a6b3a;
+}
+.diagram-node.confounding {
+  background: var(--color-confounding-bg);
+  border: 3px solid var(--color-confounding);
+  color: #922b21;
+}
+.diagram-node.neutral {
+  background: var(--color-accent-light);
+  border: 3px solid var(--color-primary);
+  color: var(--color-primary);
+}
+.diagram-arrow {
+  font-size: 2rem;
+  color: #aaa;
+  font-weight: 300;
+}
+.diagram-label {
+  font-size: clamp(0.8rem, 1.05vw, 1rem);
+  color: #666;
+  text-align: center;
+  margin-top: 0.3rem;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.6rem;
+  height: 200px;
+  margin: 1.5rem 0;
+  padding: 0 1rem;
+}
+.bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 1;
+  max-width: 140px;
+}
+.bar-pair {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  height: 160px;
+  width: 100%;
+}
+.bar {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  min-width: 28px;
+  transition: height 0.5s ease;
+}
+.bar.gsat { background: #bdc3c7; }
+.bar.ours { background: var(--color-causal); }
+.bar .bar-value {
+  position: absolute;
+  top: -1.5em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.bar-group-label {
+  font-size: 0.72rem;
+  color: #666;
+  text-align: center;
+  line-height: 1.2;
+}
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+}
+.chart-legend span::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 0.4em;
+  vertical-align: middle;
+}
+.chart-legend .legend-gsat::before { background: #bdc3c7; }
+.chart-legend .legend-ours::before { background: var(--color-causal); }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  margin-top: 1rem;
+}
+.two-col > div { padding: 0.5rem 0; }
+
+.comparison {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  margin: 1rem 0;
+}
+.comparison-vs {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ccc;
+  align-self: center;
+}
+.comparison-panel {
+  padding: 1.2rem;
+  border-radius: 8px;
+}
+.comparison-panel.left {
+  background: var(--color-confounding-bg);
+  border: 2px solid var(--color-confounding);
+}
+.comparison-panel.right {
+  background: var(--color-causal-bg);
+  border: 2px solid var(--color-causal);
+}
+.comparison-panel h3 {
+  font-size: clamp(1.1rem, 1.5vw, 1.35rem);
+  margin-bottom: 0.5rem;
+}
+
+.pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+.pipeline-step {
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: clamp(0.85rem, 1.1vw, 1rem);
+  text-align: center;
+}
+.pipeline-step.input { background: #eee; color: #333; }
+.pipeline-step.process { background: var(--color-accent-light); color: var(--color-primary); }
+.pipeline-step.causal-step { background: var(--color-causal-bg); color: #1a6b3a; border: 2px solid var(--color-causal); }
+.pipeline-step.confounding-step { background: var(--color-confounding-bg); color: #922b21; border: 2px solid var(--color-confounding); }
+.pipeline-step.output { background: #fef3e2; color: #b8860b; border: 2px solid var(--color-highlight); }
+.pipeline-arrow { font-size: 1.5rem; color: #aaa; }
+
+.stat-row {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin: 1rem 0;
+}
+.stat-item { text-align: center; }
+.stat-number {
+  font-size: clamp(2.8rem, 5vw, 4.2rem);
+  font-weight: 700;
+  color: var(--color-causal);
+  line-height: 1;
+}
+.stat-label {
+  font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+  color: #666;
+  margin-top: 0.3rem;
+}
+
+.closing-message {
+  font-family: var(--font-heading);
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  color: var(--color-primary);
+  text-align: center;
+  line-height: 1.4;
+  margin: 1rem 0;
+}
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <span class="toolbar-label">Toolbar</span>
+  <button onclick="saveToCache()">Save</button>
+  <button onclick="loadFromCache()">Load</button>
+  <button onclick="downloadHTML()">Download</button>
+  <button onclick="clearCache()">Clear Cache</button>
+  <span class="edit-indicator off" id="editIndicator">EDIT: OFF</span>
+</div>
+
+<div id="progress-bar" style="width:0%"></div>
+
+<!-- SLIDE 1: TITLE -->
+<div class="slide active" data-slide="1">
+  <div style="text-align:center;">
+    <div class="slide-title-main">A Recipe for Causal Graph Regression</div>
+    <div class="slide-subtitle">Confounding Effects Revisited</div>
+    <div class="slide-meta" style="margin-top:1.5rem;">
+      <strong>Yujia Yin</strong>, Tianyi Qu, Zihao Wang, Yifan Chen<br>
+      ICML 2025 &middot; Vancouver &middot; PMLR 267
+    </div>
+    <div class="slide-meta" style="margin-top:1.8rem; font-size:clamp(1rem,1.3vw,1.15rem);">
+      MCCP6020 Oral Presentation
+    </div>
+  </div>
+  <div class="timer" onclick="toggleTimer(1)">&#9201; 1:00</div>
+  <div class="slide-number">1 / 9</div>
+</div>
+
+<!-- SLIDE 2: HOOK -->
+<div class="slide" data-slide="2">
+  <span class="rubric-tag content">CONTENT &amp; STRUCTURE</span>
+  <span class="rubric-tag language">NON-SPECIALIST</span>
+  <div class="slide-title">Predicting Molecules: Not Yes/No, But How Much?</div>
+
+  <ul>
+    <li>Drug discovery needs <strong>exact numbers</strong> &#8212; solubility, toxicity, energy</li>
+    <li>AI learns <strong>shortcuts</strong> that correlate but don't cause</li>
+    <li>When data shifts, shortcuts <strong>break</strong></li>
+  </ul>
+
+  <div class="diagram-row" style="margin-top:1.5rem;">
+    <div class="diagram-node neutral" style="width:clamp(100px,11vw,130px);height:clamp(100px,11vw,130px);">&#129514;<br>Molecule<br>Graph</div>
+    <div class="diagram-arrow">&#8594;</div>
+    <div class="diagram-node causal">Causal<br>Part</div>
+    <div class="diagram-arrow">+</div>
+    <div class="diagram-node confounding">Shortcut<br>Part</div>
+    <div class="diagram-arrow">&#8594;</div>
+    <div class="diagram-node neutral" style="background:#fef3e2;border-color:var(--color-highlight);color:#8a6d00;">Predict<br>Value</div>
+  </div>
+  <div class="diagram-label">Green = truly causes the outcome &nbsp;|&nbsp; Red = only correlated (confounding)</div>
+
+  <div class="transition-cue">What makes regression so much harder than classification?</div>
+  <div class="timer" onclick="toggleTimer(2)">&#9201; 1:00</div>
+  <div class="slide-number">2 / 9</div>
+</div>
+
+<!-- SLIDE 3: WHY REGRESSION BREAKS -->
+<div class="slide" data-slide="3">
+  <span class="rubric-tag content">CONTENT &amp; STRUCTURE</span>
+  <span class="rubric-tag evidence">KEY FINDINGS</span>
+  <div class="slide-title">Why Regression Breaks Prior Methods</div>
+
+  <div class="comparison">
+    <div class="comparison-panel left">
+      <h3 style="color:var(--color-confounding);">Classification</h3>
+      <ul>
+        <li>"Is this toxic? <strong>YES</strong> or <strong>NO</strong>"</li>
+        <li>Finite categories &#8594; group by label</li>
+        <li>Prior methods mix graphs <em>within same class</em></li>
+      </ul>
+    </div>
+    <div class="comparison-vs">vs</div>
+    <div class="comparison-panel right">
+      <h3 style="color:var(--color-causal);">Regression</h3>
+      <ul>
+        <li>"How toxic? <strong>37.2</strong> on a scale"</li>
+        <li>Continuous values &#8594; no natural groups</li>
+        <li>Label-based intervention <strong>breaks</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout confounding" style="margin-top:1rem;">
+    <strong>Second problem:</strong> Prior methods treat confounders as pure noise &#8212; but molecular weight <em>is</em> predictive, just not causal. Ignoring it hurts separation.
+  </div>
+
+  <div class="transition-cue">We solved both problems. Let me show you how.</div>
+  <div class="timer" onclick="toggleTimer(3)">&#9201; 1:00</div>
+  <div class="slide-number">3 / 9</div>
+</div>
+
+<!-- SLIDE 4: ENHANCED GIB -->
+<div class="slide" data-slide="4">
+  <span class="rubric-tag evidence">KEY FINDINGS</span>
+  <span class="rubric-tag content">EVIDENCE</span>
+  <div class="slide-title">Insight 1: Don't Discard Confounders &#8212; Understand Them</div>
+
+  <ul>
+    <li class="confounding">Standard: force causal part to capture ALL signal, treat confounder as noise</li>
+    <li class="causal">Ours: let confounders <strong>predict too</strong> &#8212; causal part captures only causal signal</li>
+    <li>Result: much <strong>cleaner separation</strong> of cause vs correlation</li>
+  </ul>
+
+  <div class="callout causal" style="margin-top:1.2rem;">
+    <strong>Enhanced GIB =</strong> "Let confounders predict too &#8594; cleaner causal/confounding separation"
+  </div>
+
+  <div class="diagram-row" style="margin-top:1rem;">
+    <div class="diagram-node neutral" style="width:clamp(90px,9vw,110px);height:clamp(90px,9vw,110px);">G<br><span style="font-size:0.7em">Input</span></div>
+    <div class="diagram-arrow">&#8594;</div>
+    <div style="display:flex;flex-direction:column;gap:0.8rem;align-items:center;">
+      <div class="diagram-node causal" style="width:clamp(80px,8vw,100px);height:clamp(80px,8vw,100px);">C<br><span style="font-size:0.7em">Causal</span></div>
+      <div class="diagram-node confounding" style="width:clamp(80px,8vw,100px);height:clamp(80px,8vw,100px);">S<br><span style="font-size:0.7em">Confound.</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.8rem;align-items:center;">
+      <div class="diagram-arrow">&#8594; predict Y</div>
+      <div class="diagram-arrow">&#8594; predict Y</div>
+    </div>
+  </div>
+
+  <div class="transition-cue">But how do we handle causal intervention without class labels?</div>
+  <div class="timer" onclick="toggleTimer(4)">&#9201; 1:00</div>
+  <div class="slide-number">4 / 9</div>
+</div>
+
+<!-- SLIDE 5: CONTRASTIVE INTERVENTION -->
+<div class="slide" data-slide="5">
+  <span class="rubric-tag evidence">KEY FINDINGS</span>
+  <span class="rubric-tag content">EVIDENCE</span>
+  <div class="slide-title">Insight 2: Contrastive Learning Replaces Labels</div>
+
+  <ul>
+    <li>Mix causal part of graph A with <em>random</em> confounder of B &#8594; "counterfactual"</li>
+    <li class="causal"><strong>Positive pair:</strong> original A and its counterfactual (same cause)</li>
+    <li class="confounding"><strong>Negative pairs:</strong> all other graphs in the batch</li>
+  </ul>
+
+  <div class="diagram-row" style="gap:2rem;margin-top:1.5rem;">
+    <div style="text-align:center;">
+      <div class="diagram-node causal" style="width:clamp(90px,9vw,110px);height:clamp(90px,9vw,110px);">Real<br>Graph A<br>&#10003;</div>
+      <div class="diagram-label">Anchor</div>
+    </div>
+    <div style="text-align:center;">
+      <div class="diagram-node causal" style="width:clamp(90px,9vw,110px);height:clamp(90px,9vw,110px);border-style:dashed;">A's cause<br>+ B's noise<br>&#10003;</div>
+      <div class="diagram-label">Positive</div>
+    </div>
+    <div style="text-align:center;">
+      <div class="diagram-node confounding" style="width:clamp(90px,9vw,110px);height:clamp(90px,9vw,110px);">Other<br>Graph C<br>&#10007;</div>
+      <div class="diagram-label">Negative</div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:0.8rem;">
+    <strong>Key idea:</strong> "Learn to spot the real graph among plausible fakes" &#8212; no labels needed, works for regression!
+  </div>
+
+  <div class="transition-cue">Let me show the full pipeline.</div>
+  <div class="timer" onclick="toggleTimer(5)">&#9201; 1:00</div>
+  <div class="slide-number">5 / 9</div>
+</div>
+
+<!-- SLIDE 6: FULL PIPELINE -->
+<div class="slide" data-slide="6">
+  <span class="rubric-tag content">CONTENT &amp; STRUCTURE</span>
+  <div class="slide-title">Full Pipeline</div>
+
+  <div class="pipeline" style="margin-top:2rem;">
+    <div class="pipeline-step input">&#129514; Molecule<br>Graph</div>
+    <div class="pipeline-arrow">&#8594;</div>
+    <div class="pipeline-step process">GNN<br>Encoder</div>
+    <div class="pipeline-arrow">&#8594;</div>
+    <div class="pipeline-step process">Attention<br>Mask</div>
+    <div class="pipeline-arrow">&#8594;</div>
+    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+      <div class="pipeline-step causal-step">C (Causal)</div>
+      <div class="pipeline-step confounding-step">S (Confound.)</div>
+    </div>
+    <div class="pipeline-arrow">&#8594;</div>
+    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+      <div class="pipeline-step output">Predict Y</div>
+      <div class="pipeline-step" style="background:var(--color-accent-light);color:var(--color-primary);border:2px solid var(--color-primary);">Contrast</div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:2rem;">
+    <strong>Total loss</strong> = Enhanced GIB loss + &#955; &#215; Contrastive Intervention loss
+  </div>
+
+  <ul style="margin-top:1rem;">
+    <li>Single GNN backbone &#8212; lightweight addition</li>
+    <li>Plug-and-play with existing graph architectures</li>
+  </ul>
+
+  <div class="transition-cue">Does it actually work? Let's look at the numbers.</div>
+  <div class="timer" onclick="toggleTimer(6)">&#9201; 1:00</div>
+  <div class="slide-number">6 / 9</div>
+</div>
+
+<!-- SLIDE 7: RESULTS -->
+<div class="slide" data-slide="7">
+  <span class="rubric-tag evidence">EVIDENCE</span>
+  <span class="rubric-tag content">KEY FINDINGS</span>
+  <div class="slide-title">Results: Consistent Gains on GOOD-ZINC</div>
+
+  <div style="text-align:center;margin-bottom:0.4rem;">
+    <span style="font-size:clamp(0.95rem,1.2vw,1.1rem);color:#666;">Metric: <strong>MAE (Mean Absolute Error)</strong> &#8212; lower is better</span>
+  </div>
+
+  <div class="bar-chart">
+    <div class="bar-group">
+      <div class="bar-pair">
+        <div class="bar gsat" style="height:72%;"><span class="bar-value" style="color:#666;">0.142</span></div>
+        <div class="bar ours" style="height:53%;"><span class="bar-value" style="color:var(--color-causal);">0.105</span></div>
+      </div>
+      <div class="bar-group-label">Scaffold<br>Covariate</div>
+    </div>
+    <div class="bar-group">
+      <div class="bar-pair">
+        <div class="bar gsat" style="height:51%;"><span class="bar-value" style="color:#666;">0.100</span></div>
+        <div class="bar ours" style="height:26%;"><span class="bar-value" style="color:var(--color-causal);">0.052</span></div>
+      </div>
+      <div class="bar-group-label">Scaffold<br>Concept</div>
+    </div>
+    <div class="bar-group">
+      <div class="bar-pair">
+        <div class="bar gsat" style="height:100%;"><span class="bar-value" style="color:#666;">0.211</span></div>
+        <div class="bar ours" style="height:70%;"><span class="bar-value" style="color:var(--color-causal);">0.148</span></div>
+      </div>
+      <div class="bar-group-label">Size<br>Covariate</div>
+    </div>
+    <div class="bar-group">
+      <div class="bar-pair">
+        <div class="bar gsat" style="height:53%;"><span class="bar-value" style="color:#666;">0.104</span></div>
+        <div class="bar ours" style="height:29%;"><span class="bar-value" style="color:var(--color-causal);">0.058</span></div>
+      </div>
+      <div class="bar-group-label">Size<br>Concept</div>
+    </div>
+  </div>
+
+  <div class="chart-legend">
+    <span class="legend-gsat">GSAT (prev. best)</span>
+    <span class="legend-ours">Ours (CGR)</span>
+  </div>
+
+  <div class="stat-row" style="margin-top:1rem;">
+    <div class="stat-item">
+      <div class="stat-number">26&#8211;48%</div>
+      <div class="stat-label">lower OOD error vs GSAT</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">6/10</div>
+      <div class="stat-label">best OOD on ReactionOOD (RMSE)</div>
+    </div>
+  </div>
+
+  <div class="transition-cue">What does this mean for the bigger picture?</div>
+  <div class="timer" onclick="toggleTimer(7)">&#9201; 1:00</div>
+  <div class="slide-number">7 / 9</div>
+</div>
+
+<!-- SLIDE 8: SIGNIFICANCE -->
+<div class="slide" data-slide="8">
+  <span class="rubric-tag content">SIGNIFICANCE</span>
+  <div class="slide-title">Why This Matters</div>
+
+  <ul>
+    <li>First to explicitly model confounders' <strong>predictive power</strong> in graph regression</li>
+    <li>Shows classification-specific causal methods <strong>don't transfer</strong> to regression</li>
+    <li>Practical impact: <strong>drug discovery, materials science, climate modeling</strong></li>
+  </ul>
+
+  <div class="callout causal" style="margin-top:1.5rem;text-align:center;">
+    <strong style="font-size:clamp(1.2rem,1.8vw,1.5rem);">Don't discard confounders &#8212; understand them to separate them.</strong>
+  </div>
+
+  <div class="diagram-row" style="margin-top:1.5rem;gap:3rem;">
+    <div style="text-align:center;">
+      <div style="font-size:2.5rem;">&#128138;</div>
+      <div class="diagram-label">Drug Discovery</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:2.5rem;">&#128300;</div>
+      <div class="diagram-label">Materials Science</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:2.5rem;">&#127757;</div>
+      <div class="diagram-label">Climate Modeling</div>
+    </div>
+  </div>
+
+  <div class="transition-cue">What did I learn from this paper?</div>
+  <div class="timer" onclick="toggleTimer(8)">&#9201; 1:00</div>
+  <div class="slide-number">8 / 9</div>
+</div>
+
+<!-- SLIDE 9: CLOSING -->
+<div class="slide" data-slide="9">
+  <span class="rubric-tag writing">WRITING SKILLS</span>
+  <span class="rubric-tag delivery">DELIVERY</span>
+  <div class="slide-title">What I Learned &amp; Thank You</div>
+
+  <div class="two-col">
+    <div>
+      <h3 style="color:var(--color-primary);font-size:clamp(1.1rem,1.6vw,1.35rem);margin-bottom:0.8rem;">Research Lessons</h3>
+      <ul>
+        <li class="causal">Model confounders explicitly</li>
+        <li class="causal">Contrastive learning when labels unavailable</li>
+        <li class="causal">Always test on OOD data</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color:var(--color-primary);font-size:clamp(1.1rem,1.6vw,1.35rem);margin-bottom:0.8rem;">Writing Technique</h3>
+      <ul>
+        <li>Opens with sharp tension: "prior methods fail"</li>
+        <li>Every claim backed by multi-dataset evidence</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="closing-message" style="margin-top:2rem;">
+    Regression &#8800; Classification in Causal Learning.<br>
+    <span style="font-size:0.7em;color:#888;">Thank you &#8212; happy to take questions.</span>
+  </div>
+
+  <div class="timer" onclick="toggleTimer(9)">&#9201; 1:00</div>
+  <div class="slide-number">9 / 9</div>
+</div>
+
+<script>
+(function() {
+  var currentSlide = 1;
+  var totalSlides = 9;
+  var editMode = false;
+  var toolbarVisible = false;
+  var timers = {};
+
+  function showSlide(n) {
+    if (n < 1) n = 1;
+    if (n > totalSlides) n = totalSlides;
+    currentSlide = n;
+    var slides = document.querySelectorAll('.slide');
+    for (var i = 0; i < slides.length; i++) {
+      slides[i].classList.remove('active');
+    }
+    var target = document.querySelector('[data-slide="' + n + '"]');
+    if (target) target.classList.add('active');
+    updateProgress();
+  }
+
+  function nextSlide() { showSlide(currentSlide + 1); }
+  function prevSlide() { showSlide(currentSlide - 1); }
+
+  function updateProgress() {
+    var pct = (currentSlide / totalSlides) * 100;
+    document.getElementById('progress-bar').style.width = pct + '%';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (editMode && e.key !== 'Escape' && e.key.toLowerCase() !== 'e' && e.key.toLowerCase() !== 't') return;
+
+    switch(e.key) {
+      case 'ArrowRight':
+      case ' ':
+        e.preventDefault();
+        nextSlide();
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        prevSlide();
+        break;
+      case 'Home':
+        e.preventDefault();
+        showSlide(1);
+        break;
+      case 'End':
+        e.preventDefault();
+        showSlide(totalSlides);
+        break;
+      case 'e':
+      case 'E':
+        toggleEditMode();
+        break;
+      case 't':
+      case 'T':
+        toggleToolbar();
+        break;
+      case 'Escape':
+        if (editMode) toggleEditMode();
+        break;
+    }
+  });
+
+  document.addEventListener('click', function(e) {
+    if (editMode) return;
+    if (e.target.closest('#toolbar')) return;
+    if (e.target.closest('.timer')) return;
+    if (e.target.closest('button')) return;
+    var x = e.clientX / window.innerWidth;
+    if (x > 0.6) nextSlide();
+    else if (x < 0.4) prevSlide();
+  });
+
+  function toggleEditMode() {
+    editMode = !editMode;
+    var editables = document.querySelectorAll('.slide-title, .slide-title-main, .slide-subtitle, .slide-meta, .body-text, li, .callout, .closing-message, .diagram-label, h3, .transition-cue, .stat-label');
+    for (var i = 0; i < editables.length; i++) {
+      editables[i].contentEditable = editMode ? 'true' : 'false';
+    }
+    var indicator = document.getElementById('editIndicator');
+    if (editMode) {
+      indicator.textContent = 'EDIT: ON';
+      indicator.className = 'edit-indicator on';
+    } else {
+      indicator.textContent = 'EDIT: OFF';
+      indicator.className = 'edit-indicator off';
+    }
+  }
+
+  function toggleToolbar() {
+    toolbarVisible = !toolbarVisible;
+    var tb = document.getElementById('toolbar');
+    if (toolbarVisible) tb.classList.add('visible');
+    else tb.classList.remove('visible');
+  }
+
+  window.toggleTimer = function(slideNum) {
+    if (timers[slideNum]) {
+      clearInterval(timers[slideNum].interval);
+      delete timers[slideNum];
+      updateTimerDisplay(slideNum, 60);
+      return;
+    }
+    var remaining = 60;
+    timers[slideNum] = {
+      interval: setInterval(function() {
+        remaining--;
+        updateTimerDisplay(slideNum, remaining);
+        if (remaining <= 0) {
+          clearInterval(timers[slideNum].interval);
+          delete timers[slideNum];
+        }
+      }, 1000)
+    };
+  };
+
+  function updateTimerDisplay(slideNum, seconds) {
+    var timerEl = document.querySelector('[data-slide="' + slideNum + '"] .timer');
+    if (!timerEl) return;
+    var m = Math.floor(seconds / 60);
+    var s = seconds % 60;
+    timerEl.textContent = '\u23F1 ' + m + ':' + (s < 10 ? '0' : '') + s;
+    timerEl.classList.remove('warning', 'danger');
+    if (seconds <= 10 && seconds > 0) timerEl.classList.add('danger');
+    else if (seconds <= 20) timerEl.classList.add('warning');
+  }
+
+  window.saveToCache = function() {
+    localStorage.setItem('cgr-slides-v1', document.documentElement.outerHTML);
+    alert('Saved to cache!');
+  };
+
+  window.loadFromCache = function() {
+    var saved = localStorage.getItem('cgr-slides-v1');
+    if (saved) {
+      document.open();
+      document.write('<!DOCTYPE html>\n' + saved);
+      document.close();
+    } else {
+      alert('No saved version found.');
+    }
+  };
+
+  window.downloadHTML = function() {
+    var html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    var blob = new Blob([html], { type: 'text/html' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'CGR_Presentation_v0.1.html';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  window.clearCache = function() {
+    localStorage.removeItem('cgr-slides-v1');
+    alert('Cache cleared.');
+  };
+
+  updateProgress();
+})();
+</script>
+</body>
+</html>
