@@ -419,9 +419,50 @@ body {
   line-height: 1.4;
   margin: 1rem 0;
 }
+
+/* ===== EDIT MODE VISUALS ===== */
+body.edit-active [contenteditable="true"] {
+  outline: 2px dashed rgba(39, 174, 96, 0.4);
+  outline-offset: 2px;
+  border-radius: 4px;
+  cursor: text;
+}
+body.edit-active [contenteditable="true"]:focus {
+  outline: 2px solid var(--color-causal);
+  background: rgba(39, 174, 96, 0.04);
+}
+#edit-float-indicator {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.4em 1em;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  z-index: 3000;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  opacity: 0;
+  transform: translateY(-10px);
+}
+#edit-float-indicator.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+#edit-float-indicator.on {
+  background: var(--color-causal);
+  color: #fff;
+}
+#edit-float-indicator.off {
+  background: #e74c3c;
+  color: #fff;
+}
 </style>
 </head>
 <body>
+
+<div id="edit-float-indicator">EDIT: OFF</div>
 
 <div id="toolbar">
   <span class="toolbar-label">Toolbar</span>
@@ -803,13 +844,16 @@ body {
         break;
       case 'e':
       case 'E':
+        e.preventDefault();
         toggleEditMode();
         break;
       case 't':
       case 'T':
+        e.preventDefault();
         toggleToolbar();
         break;
       case 'Escape':
+        e.preventDefault();
         if (editMode) toggleEditMode();
         break;
     }
@@ -827,10 +871,17 @@ body {
 
   function toggleEditMode() {
     editMode = !editMode;
-    var editables = document.querySelectorAll('.slide-title, .slide-title-main, .slide-subtitle, .slide-meta, .body-text, li, .callout, .closing-message, .diagram-label, h3, .transition-cue, .stat-label');
+    var editables = document.querySelectorAll('.slide-title, .slide-title-main, .slide-subtitle, .slide-meta, .body-text, li, .callout, .closing-message, .diagram-label, h3, .transition-cue, .stat-label, .stat-number, .bar-value, .bar-group-label, .comparison-panel, .pipeline-step, .chart-legend span');
     for (var i = 0; i < editables.length; i++) {
       editables[i].contentEditable = editMode ? 'true' : 'false';
     }
+    // Toggle body class for CSS highlights
+    if (editMode) {
+      document.body.classList.add('edit-active');
+    } else {
+      document.body.classList.remove('edit-active');
+    }
+    // Toolbar indicator
     var indicator = document.getElementById('editIndicator');
     if (editMode) {
       indicator.textContent = 'EDIT: ON';
@@ -838,6 +889,21 @@ body {
     } else {
       indicator.textContent = 'EDIT: OFF';
       indicator.className = 'edit-indicator off';
+    }
+    // Floating indicator
+    var floatInd = document.getElementById('edit-float-indicator');
+    floatInd.textContent = editMode ? '✏️ EDIT MODE ON — press E to exit' : '✏️ EDIT MODE OFF';
+    floatInd.className = editMode ? 'visible on' : 'visible off';
+    // Auto-show toolbar when entering edit mode
+    if (editMode && !toolbarVisible) {
+      toolbarVisible = true;
+      document.getElementById('toolbar').classList.add('visible');
+    }
+    // Auto-hide floating indicator after 2s when turning off
+    if (!editMode) {
+      setTimeout(function() {
+        floatInd.className = 'off';
+      }, 1500);
     }
   }
 
