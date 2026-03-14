@@ -1,0 +1,175 @@
+My Final Draft
+Source Information
+Context: Course assignment for MCCP Spring 2026 writing sample collection.
+Status: Complete draft. Introduction with three moves, Literature Review with four moves,
+and References are included.
+Introduction
+Move 1 Establishing a Territory
+Hemagglutination inhibition (HI) determination provides experimental evidence for antigen
+identificationbetweeninfluenzavirusandreferencevaccinestrains[12,5]. Thesemeasurements
+support the selection of vaccine strains and guide public health decision-making on antigen
+changes in circulating populations [4, 6, 2]. As the global transmission scale and diversity of
+the influenza virus continue to increase[9, 8], the fast and reliable interpretation of HI data is
+crucial to public health[7]. More reliable computational predictions can reduce the number of
+laboratory measurements required to characterize emerging strains and support faster vaccine
+strain recommendations. However, this actual value depends on the data coverage that the
+monitoring system cannot fully provide in daily operation.
+Becausethemonitoringprogramcannotdetectallvirusserumpairs,theobservedHItableisvery
+incomplete[3]. Measurementcoverageisformedbypracticalandpublichealthprioritiesrather
+than unified sampling, so the available data is not all neutral samples that may interact[12, 1].
+Theassayitselfintroducesintervalcensoring,becausevaluesareimprecisewheninhibitionfalls
+outsidethetesteddilutionrange[12]. Passageeffects,variationacrosslaboratories,andchanges
+over time further influence recorded values [1, 10]. These constraints make computational
+modeling necessary, but they also make model choice important because different methods
+respond to sparsity, heterogeneity, and forward prediction needs in different ways.
+Move 2 Identifying a Niche
+Inresponsetothesedataconstraints,computationalHIpredictionhasprogressedrapidly. How-
+ever,theliteraturestilllacksaclearcomparativeaccountofhowdifferentmodelingassumptions
+shapeperformanceunderrealisticsurveillanceconditions. Inparticular,geometrybased,matrix
+based,andsequencebasedmethodsdifferintheirdependenceonobservedtiters,theirhandling
+of sparsity and assay variation, and their ability to generalize to newly emerging strains. These
+tradeoffsarethereforerarelycomparedinastructuredwayacrossmethodfamilies,especiallyin
+terms of interpretability, calibration under sparse heterogeneous observations, and prospective
+1
+utility.
+Move 3 Occupying the Niche
+In orderto solvethis comparativegap, this review studiesthree mainfamilies ofcomputational
+HI prediction methods, namely geometry-based, matrix-based and sequence-based methods,
+through the assumption of viral serum interaction. It believes that these assumptions deter-
+mine whether a method is most useful for antigen interpretation, sparse data reconstruction or
+prospectivepredictionofemergingstrains. Byorganizingliteraturearoundtheserepresentative
+commitments, it is reviewed and clarified which capabilities have matured and which method
+gaps still limit the deployment in monitoring practice.
+Literature Review
+Move 1 Thematic Overview
+Machine learning approaches to HI prediction differ mainly in how they represent virus serum
+relationships. Geometry based methods infer antigenic structure directly from measured serol-
+ogy. Matrixbasedmethodsreconstructincompleteinteractiontableswhileaccounting,tosome
+degree, for assay related distortion. Sequence based methods infer antigenic similarity or HI
+related outcomes from sequence derived features. In this review, these families are compared
+in terms of interpretability, robustness to sparse and mixed observations, and generalization to
+newly emerging strains.
+Move 2 Critical Analysis
+Geometry based methods
+Geometry-based approaches simulates the antigen correlation as the distance in the hidden
+space inferred from the HI measurement. Smith et al. [12] introduced antigenic cartography
+andshowedthatHIdatacouldbeplacedonanantigenicmap. Thismapmademajorshiftsover
+timeeasiertoseeandgavesurveillanceworkaclearwaytodescribeantigenicchange. Neheret
+al. [7] extended this idea by linking antigenic change to the phylogeny, which allowed limited
+prediction for strains without direct serological data. Taken together, these studies show that
+geometry is the most useful when the main goal is a clear explanation. At the same time, this
+family is still closely related to measured serology and corrected evolutionary positioning. It
+alsodoesnotdirectlysimulatewhysomeHIobservationsareavailablewhileothersarenot. For
+thisreason,itsrangeinpositivepredictionismorelimitedthanthatofsequence-basedmethods.
+2
+Matrix based methods
+Thematrix-basedmethodshiftsattentionfromthegeometricdistancetotheincompleteinterac-
+tion table. Adabor et al. [1] address this problem through Bayesian decomposition, separating
+antigenic signal from non antigenic assay effects such as virus avidity and antibody related
+variation. This makes the resulting antigenic estimates more useful for interpretation across
+different experimental settings. Einav and Cleary [3] use a different strategy and show that
+antibody virus measurement matrices often have low enough effective rank to support accurate
+completion of many unmeasured entries, even across studies with partial overlap. Their work
+also supports more efficient experiment planning through sample error curves that help guide
+measurement priorities. In this family, the main strength is not prediction for fully new strains.
+Instead,itisbettercalibration,denoising,andmoreefficientuseofsparsedata. Itsmainlimitis
+thatreconstructionusuallyworksontheobservedtableasitis,ratherthanmodelingsurveillance
+selection or censoring directly.
+Sequence based methods
+Thesequence-basedmethodreducesthedependenceoncurrentserologybylearningtheantigen
+relationship from the sequence-derived characteristics. This provides them with the clearest
+forward-looking prediction path. Early studies such as IAV CNN [13] show that this method
+can be classified to predict whether the strain pair has crossed the antigen threshold, rather
+than directly returning to the quantitative titre. Later research is closer to the actual use of
+settings. Shah et al. [10], for example, use only early season information to train the season-
+by-season model, and combine HA1 sequence differences with metadata such as fanaticism,
+antiserum efficacy and channel history. This design brings the assessment closer to the WHO-
+style monitoring schedule. VaxSeer [11] goes further, combining the antigenic predictor with
+the future dominant model to rank the candidate vaccines according to the coverage score. In
+retrospective analysis, this score is closely related to the effectiveness of the vaccine, which
+usually gives a better candidate ranking than past choices. The main advantage of this family
+is to develop forward. Its main limitation is its reliance on biased past training data, and its
+interpretability is weaker than map-based methods.
+Move 3 Research Gaps
+The comparison of cross-method families shows that no single method can meet the compre-
+hensive needs of influenza monitoring. The core gap is the lack of methods that can handle
+sparse and heterogeneous HI data while maintaining reliability in the prospective prediction
+of emerging strains. The two supporting tensions make this point sharper. First of all, the
+geometry-based method provides a clear description of the antigen structure, but in addition to
+the directly measured serology, there is only limited extrapolation, while the sequence-based
+3
+method is more naturally generalized to invisible variants, but provides weaker geometric ex-
+planatory. Secondly, the evaluation agreement is still inconsistent. Many research reports say
+that under random or partial retrospective splitting, the prediction is accurate, but under the
+time transfer and change between laboratories, the test robustness is less, which is the core of
+deployment.
+Move 4 Conclusion
+The three method families are complementary, not competing with each other. Geometry pro-
+vides an interpretable structure based on serological evidence. Matrix reconstruction provides
+unbiassed and intensive supervision, thus improving the calibration of heterogeneous research.
+The sequence model extends the forecast to the future and supports decision-making-centered
+evaluation. Atpresent,nosinglefamilysolvestheproblemsofcalibrationandforward-looking
+promotion under explainable and biased sampling at the same time. A plausible next step is
+to combine these strengths more explicitly. Sequence models can support forward generaliza-
+tion. Geometrycansupportcommunicationandinterpretation. Assayawarereconstructioncan
+support calibration under sparse heterogeneous measurement.
+Declaration of Generative AI and AI assisted technologies in
+the writing process
+During the preparation of this work the author used Gemini and ChatGPT in order to assist in
+improving grammar, clarity, and academic tone of the manuscript. After using these tools, the
+author reviewed and edited the content as needed and took full responsibility for the content of
+the work.
+The specific tasks are as follows:
+1. Correct colloquial expressions and incorrect vocabulary, using more academic language.
+2. Correct basic grammatical errors, spelling mistakes, and improper punctuation.
+3. Enhancetheconnectionsandlogicbetweensentences,avoidredundancy,andimprovethe
+fluency of the text.
+4. Adjust some overly subjective expressions to a more objective and neutral academic tone.
+5. Check the accuracy of reference citations in the manuscript, and ensure that the order of
+references in the appendix corresponds to the order of citations in the original text.
+4
+References
+[1] Emmanuel S Adabor and Wilfred Ndifon. Bayesian inference of antigenic and non-
+antigenic variables from haemagglutination inhibition assays for influenza surveillance.
+Royal Society Open Science, 5(7):180113, 2018.
+[2] TrevorBedford,MarcASuchard,PhilippeLemey,GytisDudas,VictoriaGregory,AlanJ
+Hay,JohnWMcCauley,ColinARussell,DerekJSmith,andAndrewRambaut.Integrating
+influenza antigenic dynamics with molecular evolution.elife, 3:e01914, 2014.
+[3] Tal Einav and Brian Cleary. Extrapolating missing antibody-virus measurements across
+serological studies.Cell Systems, 13(7):561–573, 2022.
+[4] Judith M Fonville, SH Wilks, Sarah L James, A Fox, M Ventresca, M Aban, L Xue,
+TC Jones, NMH Le, QT Pham, et al. Antibody landscapes after influenza virus infection
+or vaccination.Science, 346(6212):996–1000, 2014.
+[5] Björn F Koel, David F Burke, Theo M Bestebroer, Stefan Van Der Vliet, Gerben CM
+Zondag, Gaby Vervaet, Eugene Skepner, Nicola S Lewis, Monique IJ Spronken, Colin A
+Russell, et al. Substitutions near the receptor binding site determine major antigenic
+change during influenza virus evolution.Science, 342(6161):976–979, 2013.
+[6] Xingyi Li, Yanyan Li, Xuequn Shang, and Huihui Kong. A sequence-based machine
+learning model for predicting antigenic distance for h3n2 influenza virus.Frontiers in
+Microbiology, 15:1345794, 2024.
+[7] Richard A Neher, Trevor Bedford, Rodney S Daniels, Colin A Russell, and Boris I
+Shraiman. Prediction, dynamics, and visualization of antigenic phenotypes of seasonal
+influenza viruses. Proceedings of the National Academy of Sciences , 113(12):E1701–
+E1709, 2016.
+[8] Velislava N Petrova and Colin A Russell. The evolution of seasonal influenza viruses.
+Nature Reviews Microbiology, 16(1):47–60, 2018.
+[9] SheetalSawant,SarahAnneGurley,RGlennOverman,AngelinaSharak,SarahVMudrak,
+ThomasOguinIII,GregoryDSempowski,MarcellaSarzotti-Kelsoe,EmmanuelBWalter,
+Hang Xie, et al. H3n2 influenza hemagglutination inhibition method qualification with
+data driven statistical methods for human clinical trials.Frontiers in Immunology, 14:
+1155880, 2023.
+[10] Syed Awais W Shah, Daniel P Palomar, Ian Barr, Leo LM Poon, Ahmed Abdul Quadeer,
+and Matthew R McKay. Seasonal antigenic prediction of influenza a h3n2 using machine
+learning. Nature Communications, 15(1):3833, 2024.
+5
+[11] Wenxian Shi, Jeremy Wohlwend, Menghua Wu, and Regina Barzilay. Influenza vaccine
+strain selection with an ai-based evolutionary and antigenicity model.Nature Medicine,
+pages 1–9, 2025.
+[12] DerekJSmith,AlanSLapedes,JanCDeJong,TheoMBestebroer,GuusFRimmelzwaan,
+Albert DME Osterhaus, and Ron AM Fouchier. Mapping the antigenic and genetic
+evolution of influenza virus.science, 305(5682):371–376, 2004.
+[13] Rui Yin, Nyi Nyi Thwin, Pei Zhuang, Zhuoyi Lin, and Chee Keong Kwoh. Iav-cnn:
+a 2d convolutional neural network model to predict antigenic variants of influenza a
+virus. IEEE/ACM Transactions on Computational Biology and Bioinformatics , 19(6):
+3497–3506, 2021.
+6
