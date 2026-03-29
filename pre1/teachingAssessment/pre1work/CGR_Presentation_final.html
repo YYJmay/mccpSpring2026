@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Recipe for Causal Graph Regression — Final Presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root {
+  --green: #1B4942;
+  --green-light: #E8F0ED;
+  --green-2: #27ae60;
+  --green-2-bg: #eafaf1;
+  --red: #d64541;
+  --red-bg: #fdeeee;
+  --gold: #f39c12;
+  --text: #182028;
+  --muted: #5f6b76;
+  --line: #d9e1dc;
+  --bg: #ffffff;
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  padding: 3.6vh 5vw 4.2vh;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+.slide.active { opacity: 1; visibility: visible; }
+.content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+.slide-title-main {
+  font-family: var(--font-heading);
+  font-size: clamp(2.8rem, 5vw, 4.1rem);
+  color: var(--green);
+  line-height: 1.06;
+  margin-bottom: 0.5rem;
+}
+.slide-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 3.2vw, 3rem);
+  color: var(--green);
+  line-height: 1.12;
+  margin-bottom: 0.8rem;
+}
+.slide-subtitle {
+  font-size: clamp(1.18rem, 1.95vw, 1.68rem);
+  color: #51606d;
+  font-weight: 300;
+}
+.slide-meta {
+  margin-top: 1rem;
+  color: #6f7a84;
+  font-size: clamp(1rem, 1.15vw, 1.08rem);
+}
+.tags { margin-bottom: 0.55rem; }
+.tag {
+  display: inline-block;
+  padding: 0.16rem 0.58rem;
+  border-radius: 999px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-right: 0.35rem;
+}
+.tag.content { background: #e8f0ed; color: var(--green); }
+.tag.evidence { background: #e7f1fc; color: #1d5f98; }
+.tag.method { background: #fef4df; color: #a06900; }
+.tag.summary { background: #f6eafa; color: #6e3c8a; }
+.body-text, ul, ol { font-size: clamp(1rem, 1.3vw, 1.16rem); line-height: 1.48; }
+ul { list-style: none; }
+li { position: relative; padding: 0.24rem 0 0.24rem 1.35rem; }
+li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  top: 0.24rem;
+  color: var(--green);
+  font-weight: 700;
+}
+li.red::before { color: var(--red); }
+li.green::before { color: var(--green-2); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.35rem; align-items: center; }
+.grid-64 { display: grid; grid-template-columns: 1.18fr 0.82fr; gap: 1.35rem; align-items: center; }
+.grid-73 { display: grid; grid-template-columns: 1.35fr 0.65fr; gap: 1.2rem; align-items: start; }
+.card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 0.8rem 0.95rem;
+  box-shadow: 0 8px 24px rgba(10,20,20,0.06);
+}
+.figure-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 0.55rem;
+  box-shadow: 0 8px 24px rgba(10,20,20,0.06);
+}
+.figure-card img {
+  width: 100%;
+  display: block;
+  border-radius: 10px;
+  object-fit: contain;
+}
+.h-34 { max-height: 34vh; }
+.h-38 { max-height: 38vh; }
+.h-42 { max-height: 42vh; }
+.h-46 { max-height: 46vh; }
+.h-50 { max-height: 50vh; }
+.h-54 { max-height: 54vh; }
+.figure-label {
+  margin-top: 0.42rem;
+  font-size: 0.86rem;
+  line-height: 1.33;
+  color: var(--muted);
+}
+.callout {
+  border-left: 4px solid var(--green);
+  background: var(--green-light);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  font-size: clamp(0.96rem, 1.12vw, 1.04rem);
+  line-height: 1.42;
+}
+.callout.red { border-left-color: var(--red); background: var(--red-bg); }
+.callout.green { border-left-color: var(--green-2); background: var(--green-2-bg); }
+.section-head {
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 0.42rem;
+}
+.equation-box {
+  border: 1px solid #d7e5de;
+  border-left: 5px solid var(--green);
+  border-radius: 12px;
+  background: #fbfdfa;
+  padding: 0.72rem 0.84rem;
+}
+.eq-main { font-size: clamp(0.96rem, 1.22vw, 1.14rem); }
+.eq-sub { font-size: clamp(0.85rem, 1vw, 0.96rem); margin-top: 0.62rem; }
+.takeaway {
+  margin-top: 0.72rem;
+  color: var(--green);
+  font-weight: 700;
+  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+}
+.mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.78rem; }
+.contrast-box {
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  padding: 0.88rem 0.96rem;
+}
+.contrast-box.red { border-color: #f0b7b4; background: #fff8f8; }
+.contrast-box.green { border-color: #bfe7cb; background: #f7fcf8; }
+.contrast-box h3 {
+  font-size: 1.08rem;
+  margin-bottom: 0.35rem;
+}
+.inline-em { color: var(--green); font-weight: 700; }
+.small-note {
+  margin-top: 0.5rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.34;
+}
+.transition {
+  margin-top: 0.8rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid #e4e4e4;
+  color: var(--green);
+  font-style: italic;
+  font-size: 0.96rem;
+}
+.transition::before { content: '→ '; }
+.slide-number {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 0.95rem;
+  color: #c7c7c7;
+  font-size: 0.88rem;
+}
+.timer {
+  position: absolute;
+  top: 1rem;
+  right: 1.35rem;
+  color: var(--green);
+  font-size: 1.08rem;
+  font-weight: 700;
+  user-select: none;
+  cursor: pointer;
+  opacity: 0.78;
+}
+.timer.warning { color: var(--gold); }
+.timer.danger { color: var(--red); }
+#progress-bar {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  width: 0;
+  background: var(--green);
+  transition: width 0.25s ease;
+  z-index: 999;
+}
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; align-items: stretch; }
+.closing {
+  margin-top: 1rem;
+  font-family: var(--font-heading);
+  color: var(--green);
+  text-align: center;
+  font-size: clamp(1.45rem, 2.4vw, 2.05rem);
+  line-height: 1.3;
+}
+.tight { gap: 0.7rem; }
+@media (max-width: 1100px) {
+  .grid-2, .grid-64, .grid-73, .summary-grid, .mini-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== Edit mode ===== */
+#edit-badge {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1200;
+  background: rgba(24,32,40,0.9);
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  user-select: none;
+  pointer-events: none;
+}
+#edit-badge.on { background: rgba(39,174,96,0.95); }
+#edit-badge.off { background: rgba(214,69,65,0.95); }
+
+body.edit-mode .editable-target[contenteditable="true"] {
+  outline: 2px dashed rgba(39,174,96,0.45);
+  outline-offset: 3px;
+  border-radius: 6px;
+  cursor: text;
+}
+body.edit-mode .editable-target[contenteditable="true"]:focus {
+  outline: 2px solid rgba(39,174,96,0.95);
+  background: rgba(232,240,237,0.45);
+}
+
+#edit-help {
+  position: fixed;
+  top: 1rem;
+  left: 10.5rem;
+  z-index: 1200;
+  background: rgba(27,73,66,0.92);
+  color: #fff;
+  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+  font-size: 0.76rem;
+  line-height: 1.3;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+body.edit-mode #edit-help {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+</style>
+</head>
+<body>
+
+<div id="edit-badge" class="off">EDIT OFF · press E</div>
+<div id="edit-help">Edit mode is on. Changes save automatically.<br>Press E to exit. Press Shift+R to reset saved edits.</div>
+
+<div id="progress-bar"></div>
+
+<section class="slide active" data-slide="1">
+  <div class="content-area" style="justify-content:center; text-align:center;">
+    <div class="slide-title-main">A Recipe for Causal Graph Regression</div>
+    <div class="slide-subtitle">Confounding Effects Revisited</div>
+    <div class="slide-meta">
+      <strong>Yujia Yin</strong>, Tianyi Qu, Zihao Wang, Yifan Chen<br>
+      ICML 2025 · Vancouver · PMLR 267
+    </div>
+    <div class="slide-meta" style="margin-top:1.35rem;">MCCP6020 Oral Presentation</div>
+  </div>
+  <div class="timer" onclick="toggleTimer(1)">⏱ 1:00</div>
+  <div class="slide-number">1 / 10</div>
+</section>
+
+<section class="slide" data-slide="2">
+  <div class="content-area">
+    <div class="tags">
+      <span class="tag content">motivation</span>
+      <span class="tag evidence">problem setting</span>
+    </div>
+    <div class="slide-title">Why Causal Graph Regression Matters</div>
+    <div class="grid-2">
+      <div>
+        <ul>
+          <li>Graph regression predicts <strong>continuous molecular properties</strong> such as solubility, energy, or reaction outcomes.</li>
+          <li class="red">Under distribution shift, a model may rely on <strong>shortcut correlations</strong> that fit training data but fail OOD.</li>
+          <li class="green">The paper frames this using a causal subgraph $C$ and a confounding subgraph $S$ extracted from the full graph $G$.</li>
+        </ul>
+        <div class="callout red" style="margin-top:0.9rem;">
+          Key tension: a confounder can be <strong>non-causal</strong> yet still <strong>predictive</strong>. That is why simply throwing away shortcut information is too crude.
+        </div>
+      </div>
+      <div class="figure-card">
+        <img class="h-42" src="figs/scm_diagram.png" alt="Structural causal model for graph regression">
+        <div class="figure-label">SCM view: the graph generates both causal information $C$ and confounding information $S$, but only the causal mechanism should stay stable across environments.</div>
+      </div>
+    </div>
+  </div>
+  <div class="transition">So the real question is not whether confounding exists, but why earlier causal graph methods struggle when the target becomes continuous.</div>
+  <div class="timer" onclick="toggleTimer(2)">⏱ 1:00</div>
+  <div class="slide-number">2 / 10</div>
+</section>
+
+<section class="slide" data-slide="3">
+  <div class="content-area">
+    <div class="tags">
+      <span class="tag content">challenge</span>
+      <span class="tag method">why prior work breaks</span>
+    </div>
+    <div class="slide-title">Why Prior Causal Graph Learning Does Not Transfer Cleanly</div>
+    <div class="mini-grid">
+      <div class="contrast-box red">
+        <h3 style="color:var(--red);">Obstacle 1: regression has no class labels</h3>
+        <ul>
+          <li>classification methods often use <strong>label-conditioned intervention</strong></li>
+          <li>regression targets are continuous, so graphs cannot be grouped by class</li>
+          <li>the usual supervised intervention recipe becomes awkward or unavailable</li>
+        </ul>
+      </div>
+      <div class="contrast-box red">
+        <h3 style="color:var(--red);">Obstacle 2: confounders may still predict $Y$</h3>
+        <ul>
+          <li>many methods implicitly treat the confounding branch as pure noise</li>
+          <li>but in molecules, shortcut attributes can still correlate strongly with the target</li>
+          <li>forcing $S$ to be useless can contaminate the causal branch instead of helping it</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" style="margin-top:0.95rem;">
+      <div class="section-head">This paper's answer</div>
+      <ul>
+        <li class="green"><strong>Ingredient 1:</strong> let the confounding branch remain predictive, but separate it from the invariant causal branch.</li>
+        <li class="green"><strong>Ingredient 2:</strong> replace label-based intervention with a contrastive, label-free intervention objective.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="transition">Before unpacking those two ingredients, here is the full recipe in one slide.</div>
+  <div class="timer" onclick="toggleTimer(3)">⏱ 1:00</div>
+  <div class="slide-number">3 / 10</div>
+</section>
+
+<section class="slide" data-slide="4">
+  <div class="content-area">
+    <div class="tags">
+      <span class="tag method">framework</span>
+      <span class="tag evidence">roadmap</span>
+    </div>
+    <div class="slide-title">The Recipe at a Glance</div>
+    <div class="figure-card">
+      <img class="h-46" src="figs/framework_overview.png" alt="Overall framework of causal graph regression">
+      <div class="figure-label">A shared encoder and learned masks split each graph into causal and confounding subgraphs. The causal branch and confounding branch both predict the target, and mixed representations support label-free intervention.</div>
+    </div>
+    <div class="mini-grid" style="margin-top:0.8rem;">
+      <div class="callout"><strong>Ingredient 1:</strong> enhanced GIB learns <strong>what should stay in $C$</strong> and what can remain in $S$.</div>
+      <div class="callout green"><strong>Ingredient 2:</strong> contrastive intervention teaches the model that the same causal signal should survive changing confounders.</div>
+    </div>
+  </div>
+  <div class="transition">Now I unpack the first ingredient: why the confounding branch should be predictive instead of discarded.</div>
+  <div class="timer" onclick="toggleTimer(4)">⏱ 1:00</div>
+  <div class="slide-number">4 / 10</div>
+</section>
+
+<section class="slide" data-slide="5">
+  <div class="content-area">
+    <div class="tags">
+      <span class="tag method">ingredient 1</span>
+      <span class="tag evidence">core equation</span>
+    </div>
+    <div class="slide-title">Ingredient 1: Model Predictive Confounders with Enhanced GIB</div>
+    <div class="grid-64">
+      <div>
+        <div class="equation-box">
+          <div class="eq-main">$$\mathcal{L}_{\mathrm{GIB}}=\mathcal{L}_c+\beta \mathcal{L}_s=-I(C;Y)+\alpha I(C;G)-\beta I(S;Y)$$</div>
+        </div>
+        <ul style="margin-top:0.7rem;">
+          <li class="red">The older assumption is that $S$ should contain <strong>no useful information</strong> for predicting $Y$.</li>
+          <li class="green">The new term $I(S;Y)$ says: let $S$ capture signal that is <strong>predictive but unstable</strong>.</li>
+          <li>That prevents the causal branch from absorbing every training correlation just to fit the target.</li>
+        </ul>
+        <div class="takeaway">Takeaway: better disentanglement comes from modeling confounding realistically, not pretending it is irrelevant.</div>
+      </div>
+      <div>
+        <div class="equation-box">
+          <div class="eq-sub">$$\mathcal{L}_c \propto -\frac{1}{N}\sum_{i=1}^{N}(Y_i-\mu_{c,i})^2 + \alpha \, \mathbb{E}_{p(G)}\!\left[\lVert \mu_\phi(G) \rVert^2\right]$$</div>
+        </div>
+        <div class="equation-box" style="margin-top:0.65rem;">
+          <div class="eq-sub">$$\mathcal{L}_s \propto -\frac{1}{N}\sum_{i=1}^{N}(Y_i-\mu_{s,i})^2$$</div>
+        </div>
+        <div class="callout green" style="margin-top:0.75rem;">
+          Both branches predict $Y$, but only the causal branch is bottlenecked to keep the representation compact and more invariant.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="transition">The second ingredient addresses the other obstacle: how to intervene without relying on discrete labels.</div>
+  <div class="timer" onclick="toggleTimer(5)">⏱ 1:00</div>
+  <div class="slide-number">5 / 10</div>
+</section>
+
+<section class="slide" data-slide="6">
+  <div class="content-area">
+    <div class="tags">
+      <span class="tag method">ingredient 2</span>
+      <span class="tag evidence">intervention</span>
+    </div>
+    <div class="slide-title">Ingredient 2: Replace Label-Based Intervention with Contrastive Intervention</div>
+    <div class="grid-2">
+      <div>
+        <div class="equation-box">
+          <div class="eq-main">$$H_{\mathrm{mix},ij}=H_{c,i}+H_{s,j}$$</div>
+        </div>
+        <ul style="margin-top:0.72rem;">
+          <li>Keep the causal representation of graph $i$, but swap in confounding information from graph $j$.</li>
+          <li class="green">If $H_{c,i}$ really captures stable causal content, the mixed graph should still align with the original graph.</li>
+          <li class="red">This turns intervention into a label-free comparison, which is exactly what regression needs.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="equation-box">
+          <div class="eq-sub">$$\mathcal{L}_{\mathrm{CI}}=-\frac{1}{B}\sum_{i=1}^{B}\log \frac{\exp(\operatorname{sim}(H_{g,i},H_{\mathrm{mix},ij}))}{\sum_{k=1, k \neq i}^{B} \exp(\operatorname{sim}(H_{g,i},H_{g,k}))}$$</div>
+        </div>
+        <div class="callout green" style="margin-top:0.8rem;">
+          The intervention objective becomes <span class="inline-em">instance discrimination</span>: original graph versus its mixed counterpart, instead of class-conditioned counterfactual prediction.
+        </div>
+        <div class="small-note">So the overall method directly targets the two regression-specific failures introduced on the previous slide.</div>
+      </div>
+    </div>
+  </div>
+  <div class="transition">Once both ingredients are in place, the next question is empirical: does the recipe actually improve OOD performance?</div>
+  <div class="timer" onclick="toggleTimer(6)">⏱ 1:00</div>
+  <div class="slide-number">6 / 10</div>
+</section>
+
+<section class="slide" data-slide="7">
+  <div class="content-area">
+    <div class="tags">
+      <span class="tag evidence">results</span>
+      <span class="tag content">main benchmark</span>
+    </div>
+    <div class="slide-title">Main Evidence: GOOD-ZINC</div>
+    <div class="figure-card">
+      <img class="h-46" src="figs/good_zinc_table.png" alt="GOOD-ZINC results table">
+    </div>
+    <div class="mini-grid" style="margin-top:0.8rem;">
+      <div class="callout green"><strong>Main message:</strong> on GOOD-ZINC, the method achieves the best OOD error across all four reported OOD settings.</div>
+      <div class="callout">So the two recipe changes are not cosmetic: they translate into consistent gains on the paper's primary benchmark.</div>
+    </div>
+  </div>
+  <div class="transition">But do the two ingredients themselves matter, or could the gains come from the architecture alone?</div>
+  <div class="timer" onclick="toggleTimer(7)">⏱ 1:00</div>
+  <div class="slide-number">7 / 10</div>
+</section>
+
+<section class="slide" data-slide="8">
+  <div class="content-area">
+    <div class="tags">
+      <span class="tag evidence">ablation</span>
+      <span class="tag method">mechanism check</span>
+    </div>
+    <div class="slide-title">Mechanism Check: Each Ingredient Matters</div>
+    <div class="grid-2">
+      <div>
+        <div class="figure-card">
+          <img class="h-34" src="figs/ablation_confounder.png" alt="Ablation for predictive confounder modeling">
+          <div class="figure-label">Ablation 1: the variant that lets the confounding branch stay predictive outperforms the version that ignores confounders.</div>
+        </div>
+        <div class="callout green" style="margin-top:0.7rem;">This validates <strong>Ingredient 1</strong>: confounders are often predictive, so modeling them explicitly helps disentanglement.</div>
+      </div>
+      <div>
+        <div class="figure-card">
+          <img class="h-34" src="figs/ablation_contrastive.png" alt="Ablation for contrastive intervention">
+          <div class="figure-label">Ablation 2: contrastive intervention is stronger than the supervised intervention used in classification-style settings.</div>
+        </div>
+        <div class="callout"><strong>This validates Ingredient 2:</strong> once labels are continuous, a label-free intervention objective is the more natural and more effective choice.</div>
+      </div>
+    </div>
+  </div>
+  <div class="transition">Finally, the paper checks whether this recipe extends beyond a single benchmark.</div>
+  <div class="timer" onclick="toggleTimer(8)">⏱ 1:00</div>
+  <div class="slide-number">8 / 10</div>
+</section>
+
+<section class="slide" data-slide="9">
+  <div class="content-area">
+    <div class="tags">
+      <span class="tag evidence">additional results</span>
+      <span class="tag content">external benchmarks</span>
+    </div>
+    <div class="slide-title">Beyond GOOD-ZINC: Additional OOD Regression Benchmarks</div>
+    <div class="grid-73">
+      <div class="figure-card">
+        <img class="h-46" src="figs/reactionood_table.png" alt="ReactionOOD results table">
+        <div class="figure-label">ReactionOOD results on Cycloaddition and RDB7 show that the method remains competitive on other molecular OOD regression shifts.</div>
+      </div>
+      <div class="tight" style="display:flex; flex-direction:column; gap:0.8rem; justify-content:center;">
+        <div class="figure-card">
+          <img class="h-34" src="figs/e2sn2_table.png" alt="E2SN2 results table">
+        </div>
+        <div class="callout green"><strong>Role of this slide:</strong> Slide 7 gave the headline result, while this slide shows the recipe is not benchmark-specific.</div>
+      </div>
+    </div>
+  </div>
+  <div class="transition">That leaves a simple takeaway: causal graph regression needs both a better confounder model and a better intervention objective.</div>
+  <div class="timer" onclick="toggleTimer(9)">⏱ 1:00</div>
+  <div class="slide-number">9 / 10</div>
+</section>
+
+<section class="slide" data-slide="10">
+  <div class="content-area">
+    <div class="tags">
+      <span class="tag summary">summary</span>
+    </div>
+    <div class="slide-title">Conclusion</div>
+    <div class="summary-grid">
+      <div class="card">
+        <div class="section-head">The paper's storyline</div>
+        <ul>
+          <li class="green">Regression breaks the usual CGL recipe because <strong>labels are continuous</strong> and <strong>confounders can still be predictive</strong>.</li>
+          <li class="green">The framework answers this with two ingredients: <strong>enhanced GIB</strong> and <strong>contrastive intervention</strong>.</li>
+          <li class="green">The empirical results and ablations show that both ingredients contribute to stronger OOD generalization.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="section-head">One-sentence takeaway</div>
+        <ul>
+          <li>causal graph regression is <strong>not</strong> just classification with continuous labels</li>
+          <li>it needs a realistic treatment of confounders</li>
+          <li>and it needs an intervention mechanism that does not depend on class labels</li>
+        </ul>
+      </div>
+    </div>
+    <div class="closing">
+      A clear recipe emerges:<br>
+      model predictive confounders, then intervene without labels.
+    </div>
+  </div>
+  <div class="timer" onclick="toggleTimer(10)">⏱ 1:00</div>
+  <div class="slide-number">10 / 10</div>
+</section>
+
+
+<script>
+(() => {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let current = Math.max(0, slides.findIndex(s => s.classList.contains('active')));
+  if (current < 0) current = 0;
+
+  const STORAGE_KEY = 'cgr_presentation_autosave_v1';
+  const badge = document.getElementById('edit-badge');
+  let editMode = false;
+  let saveTimer = null;
+
+  function showSlide(index) {
+    current = Math.max(0, Math.min(index, slides.length - 1));
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === current);
+    });
+    updateProgress();
+  }
+
+  function nextSlide() { showSlide(current + 1); }
+  function prevSlide() { showSlide(current - 1); }
+
+  function updateProgress() {
+    const bar = document.getElementById('progress-bar');
+    if (!bar) return;
+    const total = slides.length || 1;
+    bar.style.width = ((current + 1) / total * 100) + '%';
+  }
+
+  function makeEditableTargets() {
+    const selectors = [
+      '.slide-title-main', '.slide-title', '.slide-subtitle', '.slide-meta',
+      '.tag', '.section-head', '.figure-label', '.callout', '.takeaway',
+      '.small-note', '.transition', '.closing', 'li'
+    ];
+    document.querySelectorAll(selectors.join(',')).forEach(el => {
+      el.classList.add('editable-target');
+      el.setAttribute('contenteditable', 'false');
+      el.setAttribute('spellcheck', 'false');
+    });
+  }
+
+  function captureState() {
+    const payload = {};
+    document.querySelectorAll('.editable-target').forEach((el, idx) => {
+      payload[idx] = el.innerHTML;
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }
+
+  function scheduleSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(captureState, 150);
+  }
+
+  function restoreState() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    try {
+      const payload = JSON.parse(raw);
+      document.querySelectorAll('.editable-target').forEach((el, idx) => {
+        if (Object.prototype.hasOwnProperty.call(payload, idx)) {
+          el.innerHTML = payload[idx];
+        }
+      });
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise();
+      }
+    } catch (err) {
+      console.warn('Failed to restore saved edits:', err);
+    }
+  }
+
+  function setEditMode(on) {
+    editMode = on;
+    document.body.classList.toggle('edit-mode', on);
+    document.querySelectorAll('.editable-target').forEach(el => {
+      el.setAttribute('contenteditable', on ? 'true' : 'false');
+    });
+    badge.textContent = on ? 'EDIT ON · autosaving' : 'EDIT OFF · press E';
+    badge.classList.toggle('on', on);
+    badge.classList.toggle('off', !on);
+  }
+
+  function resetSavedEdits() {
+    localStorage.removeItem(STORAGE_KEY);
+    window.location.reload();
+  }
+
+  window.showSlide = showSlide;
+  window.nextSlide = nextSlide;
+  window.prevSlide = prevSlide;
+  window.toggleTimer = function() {};
+
+  makeEditableTargets();
+  restoreState();
+
+  document.addEventListener('input', (e) => {
+    if (editMode && e.target.closest('.editable-target')) {
+      scheduleSave();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === 'e' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      e.preventDefault();
+      setEditMode(!editMode);
+      return;
+    }
+    if (e.key.toLowerCase() === 'r' && e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      e.preventDefault();
+      if (confirm('Reset all saved edits and reload this deck?')) {
+        resetSavedEdits();
+      }
+      return;
+    }
+
+    const inEditable = e.target && e.target.closest && e.target.closest('.editable-target[contenteditable="true"]');
+    if (editMode && inEditable) {
+      return;
+    }
+
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) {
+      e.preventDefault();
+      nextSlide();
+    } else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) {
+      e.preventDefault();
+      prevSlide();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      showSlide(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      showSlide(slides.length - 1);
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (editMode) return;
+    if (!e.target.closest('.timer, a, button, input, textarea, select, .editable-target')) {
+      nextSlide();
+    }
+  });
+
+  badge.addEventListener('dblclick', () => setEditMode(!editMode));
+
+  showSlide(current);
+})();
+</script>
+
+
+</body>
+</html>
