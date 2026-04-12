@@ -3,168 +3,165 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>First Draft Poster - A Recipe for Causal Graph Regression</title>
+  <title>A Recipe for Causal Graph Regression: Confounding Effects Revisited</title>
   <style>
     :root {
-      --bg: #f1f4fa;
+      --bg: #f4f7fa;
       --paper: #ffffff;
-      --ink: #0f172a;
-      --muted: #475569;
-      --line: #cbd5e1;
-      --brand: #0b2a6f;
-      --brand-soft: #eaf0ff;
-      --accent: #b45309;
-      --accent-soft: #fff7ed;
-      --ok: #166534;
-      --ok-soft: #ecfdf3;
+      --ink: #1b2a35;
+      --muted: #4a5c68;
+      --line: #c9d6df;
+      --brand: #1b6a8d;
+      --brand-dark: #154c67;
+      --brand-soft: #edf6fb;
     }
 
     * { box-sizing: border-box; }
 
-    body {
+    html, body {
       margin: 0;
-      padding: 16px;
+      padding: 0;
       background: var(--bg);
       color: var(--ink);
       font-family: "Times New Roman", Times, serif;
     }
 
+    body { padding: 12px; }
+
     .poster {
-      width: 1280px;
-      min-height: 1780px;
+      width: 841px;
+      max-width: 100%;
+      aspect-ratio: 841 / 1189;
+      height: auto;
+      min-height: 0;
       margin: 0 auto;
       background: var(--paper);
-      border: 1px solid var(--line);
-      box-shadow: 0 16px 40px rgba(11, 42, 111, 0.08);
+      box-shadow: 0 3px 14px rgba(0, 0, 0, 0.12);
+      display: grid;
+      grid-template-rows: 10fr 90fr;
     }
 
     .header {
-      display: grid;
-      grid-template-columns: 1fr 4fr 1fr;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      border-bottom: 4px solid var(--brand);
-      padding: 18px 24px;
-      background: linear-gradient(90deg, #f8fbff 0%, #ffffff 40%, #f8fbff 100%);
+      border-bottom: 2px solid #355c6f;
+      padding: 4px 12px 28px;
+      gap: 2px;
     }
 
-    .logo {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.35;
+    .header-logo {
+      position: absolute;
+      bottom: 10px;
+      height: 40px;
+      width: auto;
+      object-fit: contain;
     }
 
-    .title-wrap { text-align: center; }
+    .header-logo.left {
+      left: 40px;
+    }
+
+    .header-logo.right {
+      right: 60px;
+    }
 
     .title {
       margin: 0;
+      text-align: center;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 46px;
-      color: var(--brand);
-      line-height: 1.12;
-      letter-spacing: 0.2px;
+      font-size: 34px;
+      line-height: 1.03;
+      color: #143b52;
+      font-weight: 700;
     }
 
-    .meta {
-      margin: 8px 0 0;
-      font-size: 24px;
-      color: #1f2937;
-    }
-
-    .dept {
-      text-align: right;
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.35;
-    }
-
-    main { padding: 18px 20px 22px; }
-
-    .layman {
-      background: var(--brand-soft);
-      border: 1px solid #b6c5ef;
-      border-left: 7px solid var(--brand);
-      padding: 12px 14px;
-      margin-bottom: 14px;
-      font-size: 21px;
-      line-height: 1.36;
-    }
-
-    .layman strong {
-      display: block;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 24px;
-      margin-bottom: 4px;
-      color: var(--brand);
-    }
-
-    .key-strip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .metric {
-      background: #f8fafc;
-      border: 1px solid var(--line);
-      border-top: 4px solid var(--accent);
-      padding: 8px 10px;
-    }
-
-    .metric .label {
+    .authors {
+      margin-top: 2px;
+      text-align: center;
       font-family: Arial, Helvetica, sans-serif;
       font-size: 15px;
-      color: var(--muted);
-      margin-bottom: 4px;
+      color: #2c495c;
     }
 
-    .metric .value {
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--brand);
-      line-height: 1.1;
-    }
-
-    .cols {
+    main {
+      padding: 10px;
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 43fr 39fr 18fr;
       gap: 12px;
+      min-height: 0;
     }
 
-    .col {
+    .row-a {
       display: grid;
-      gap: 10px;
-      align-content: start;
+      grid-template-columns: 36fr 64fr;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .row-b {
+      display: grid;
+      grid-template-columns: 46fr 54fr;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .row-c {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .row-b-left {
+      display: grid;
+      grid-template-rows: 66fr 34fr;
+      gap: 12px;
+      min-height: 0;
     }
 
     .card {
       border: 1px solid var(--line);
-      background: #ffffff;
-      padding: 10px 11px;
+      background: #fff;
+      padding: 8px 9px;
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
-    h2 {
-      margin: 0 0 8px;
+    .card-title {
+      margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 22px;
-      color: var(--brand);
-      border-bottom: 2px solid #c4d1f1;
-      padding-bottom: 4px;
-      letter-spacing: 0.2px;
+      font-size: 16px;
+      line-height: 1.1;
+      color: #194a63;
+      font-weight: 700;
+      padding-bottom: 6px;
     }
 
-    h3 {
-      margin: 6px 0 5px;
+    .card-subtitle {
+      margin: 0 0 4px;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 17px;
-      color: #1f2937;
+      font-size: 14px;
+      color: #2f5b72;
+      font-weight: 700;
+    }
+
+    .card-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      padding-top: 6px;
+      overflow: visible;
     }
 
     p, li {
-      font-size: 18px;
-      line-height: 1.34;
-      margin: 0 0 6px;
+      margin: 0 0 5px;
+      font-size: 14px;
+      line-height: 1.24;
     }
 
     ul {
@@ -172,350 +169,403 @@
       padding-left: 18px;
     }
 
-    .formula {
-      font-family: "Courier New", Courier, monospace;
-      font-size: 14px;
-      background: #f8fafc;
-      border: 1px solid var(--line);
-      padding: 8px 9px;
-      border-radius: 3px;
-      margin-top: 7px;
-      line-height: 1.4;
-    }
+    .short-list li { margin-bottom: 4px; }
 
-    .flow {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr auto 1fr;
-      align-items: center;
-      gap: 5px;
-      margin: 6px 0 0;
-    }
-
-    .node {
-      border: 1px solid #bfd0f8;
-      background: #f6f9ff;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 14px;
-      padding: 8px;
-      text-align: center;
-    }
-
-    .arrow {
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 20px;
-      color: var(--brand);
-      font-weight: 700;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 4px;
-      font-size: 15px;
-    }
-
-    th, td {
-      border: 1px solid #d6deeb;
-      padding: 5px 6px;
-      text-align: center;
-      vertical-align: middle;
-    }
-
-    th {
-      background: #f3f7ff;
-      color: #1f2937;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 13px;
-    }
-
-    .best {
-      background: var(--ok-soft);
-      color: var(--ok);
-      font-weight: 700;
-    }
-
-    .good {
-      background: var(--accent-soft);
-      color: #9a3412;
-      font-weight: 700;
-    }
-
-    .note {
+    .idea-box {
       margin-top: 6px;
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.3;
-    }
-
-    .tag {
-      display: inline-block;
-      margin: 2px 4px 2px 0;
-      padding: 2px 7px;
-      border-radius: 999px;
-      border: 1px solid #d8e1f4;
-      background: #f7faff;
-      color: #1e3a8a;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .refs li {
-      font-size: 15px;
-      margin-bottom: 4px;
-    }
-
-    .footer {
-      border-top: 1px solid var(--line);
-      background: #fbfcff;
-      padding: 9px 12px;
+      padding: 7px 8px;
+      background: var(--brand-soft);
+      border-left: 4px solid var(--brand);
       font-size: 13px;
-      color: var(--muted);
+      line-height: 1.28;
+    }
+
+    .figure {
+      border: 1px solid #d0dae1;
+      padding: 4px;
+      background: #fff;
+      margin-top: 0;
+      min-height: 0;
+      overflow: hidden;
       display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .figure img {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+    }
+
+    .caption {
+      margin-top: 4px;
+      font-size: 12px;
+      line-height: 1.2;
+      color: var(--muted);
+    }
+
+    .formula {
+      background: transparent;
+      border: 0;
+      padding: 1px 0;
+      margin-top: 2px;
+      font-size: 15px;
+      line-height: 0.98;
+      text-align: center;
+      overflow-wrap: anywhere;
+      white-space: normal;
+      font-family: "Times New Roman", Times, serif;
+    }
+
+    .formula .mjx-chtml {
+      font-size: 100% !important;
+    }
+
+    .formula mjx-container[display="true"] {
+      margin: 0.02em 0 !important;
+    }
+
+    .take-home {
+      border: 1px solid #b9cbd6;
+      background: #f7fbfe;
+      padding: 7px 8px;
+      margin-top: 6px;
+      font-size: 13px;
+      line-height: 1.22;
+    }
+
+    .kpi {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-top: 0;
+      align-items: center;
+    }
+
+    .kpi-item {
+      border: 1px solid #cfdbe3;
+      background: #fbfdff;
+      padding: 2px 4px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 9px;
+      line-height: 1.05;
+      text-align: center;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .kpi-item strong {
+      display: inline;
+      font-size: 11px;
+      color: #11435b;
+      margin-right: 3px;
+      margin-bottom: 0;
+    }
+
+    .problem-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 5px;
+    }
+
+    .method-body {
+      display: grid;
+      grid-template-rows: 1fr;
+      gap: 6px;
+    }
+
+    .method-body .figure {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .method-body .figure img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    .gib-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 3px;
+    }
+
+    .gib-body .figure {
+      flex: 1 1 0;
+      min-height: 100px;
+      padding: 0 ;
+      margin-top: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* .gib-body .figure img {
+      width: 96%;
+      max-width: 96%;
+      height: 80%;
+      object-fit: contain;
+      object-position: center;
+    }
+     */
+    .gib-body .figure img {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    transform: scale(0.8);   /* 逐步试 1.05 / 1.1 / 1.15 */
+    transform-origin: center;
+    object-fit: contain;
+    object-position: center;
+    }
+    .intervention-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 2px;
+    }
+
+    .intervention-body .formula {
+      line-height: 1.08;
+      margin-top: 4px;
+    }
+
+    .results-body {
+      display: grid;
+      grid-template-rows: 34fr 60fr 6fr;
+      gap: 0;
+    }
+
+    .results-body .figure {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .results-body .figure.secondary {
+      align-items: flex-end;
+    }
+
+    .results-body .figure img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+    }
+
+    .results-body .figure.secondary img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    .key-body {
+      display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ablation-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      align-items: center;
+      justify-items: center;
+      background: transparent;
+      border: 1px solid #d0dae1;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    .ablation-body img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .take-body {
+      height: 100%;
+    }
+
+    .take-body .caption { margin: 0; }
+
+    .take-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .take-list li {
+      margin: 0 0 7px;
+      font-size: 13px;
+      line-height: 1.28;
+    }
+
+    @media (max-width: 1120px) {
+      body { padding: 0; }
+      .poster { width: 100%; height: auto; min-height: 0; display: block; }
+      .row-a,
+      .row-b,
+      .row-c,
+      .header { grid-template-columns: 1fr; }
+      .authors,
+      .title { text-align: center; }
+      main { grid-template-rows: auto auto auto; }
+    }
+
+    @media print {
+      body { padding: 0; background: #fff; }
+      .poster { width: 100%; height: auto; box-shadow: none; display: block; }
+      main { grid-template-rows: auto auto auto; }
     }
   </style>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
 <body>
   <article class="poster">
     <header class="header">
-      <div class="logo">
-        [HKBU Logo]<br/>
-        [Lab / Group Logo]
-      </div>
-      <div class="title-wrap">
-        <h1 class="title">A Recipe for Causal Graph Regression:<br/>Confounding Effects Revisited</h1>
-        <p class="meta">Yujia Yin, Tianyi Qu, Zihao Wang, Yifan Chen · ICML 2025 · Poster First Draft</p>
-      </div>
-      <div class="dept">
-        Presenter: Yujia Yin<br/>
-        Principal Supervisor: [Fill Name]
-      </div>
+      <img class="header-logo left" src="../../pre1/teachingAssessment/pre1work/figs/icml_logo.png" alt="ICML logo" />
+      <h1 class="title">A Recipe for Causal Graph Regression:<br />Confounding Effects Revisited</h1>
+      <div class="authors">Yujia Yin*, Tianyi Qu*, Zihao Wang, Yifan Chen</div>
+      <img class="header-logo right" src="../../pre1/teachingAssessment/pre1work/figs/hkbu_logo.png" alt="HKBU logo" />
     </header>
 
     <main>
-      <section class="layman">
-        <strong>Layman’s Summary</strong>
-        Graph AI models often break when test data shifts from training data. We propose a causal graph regression recipe that separates stable causal signals from confounding correlations, and keeps performance reliable under out-of-distribution shifts.
+      <section class="row-a">
+        <article class="card">
+          <h2 class="card-title">Problem and Why It Matters</h2>
+          <div class="card-body problem-body">
+          <ul class="short-list">
+            <li>Most causal graph OOD methods target classification, not regression.</li>
+            <li>Regression is harder: continuous targets weaken label-dependent intervention.</li>
+            <li>Confounders can still be predictive in real-world graph regression.</li>
+          </ul>
+
+          <h3 class="card-subtitle">Our Idea</h3>
+          <div class="idea-box">
+            Treat confounders as potentially predictive, and learn intervention through contrastive training to preserve causal signal while suppressing spurious shortcuts.
+          </div>
+
+          <h3 class="card-subtitle" style="margin-top: 8px;">Contributions</h3>
+          <ol style="margin: 0; padding-left: 19px; font-size: 15px; line-height: 1.25;">
+            <li>First systematic framework for causal graph regression.</li>
+            <li>Enhanced GIB objective modeling predictive confounders.</li>
+            <li>Label-agnostic contrastive intervention loss.</li>
+          </ol>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2 class="card-title">Method Overview</h2>
+          <div class="card-body method-body">
+          <div class="figure">
+            <img src="../../pre1/teachingAssessment/pre1work/figs/framework_overview.png" alt="Causal graph regression framework" />
+          </div>
+          </div>
+        </article>
       </section>
 
-      <section class="key-strip">
-        <div class="metric">
-          <div class="label">Main Task</div>
-          <div class="value">Graph OOD Regression</div>
+      <section class="row-b">
+        <div class="row-b-left">
+          <article class="card">
+            <h2 class="card-title">Enhanced GIB Objective</h2>
+            <div class="card-body gib-body">
+            <div class="formula">
+$$L_{\mathrm{GIB}}=L_c+\beta L_s=-I(C;Y)+\alpha I(C;G)-\beta I(S;Y)$$
+            </div>
+            <ul class="short-list" style="margin-top: 4px;">
+              <li><strong>$L_c$:</strong> prediction from causal representation.</li>
+              <li><strong>$L_s$:</strong> confounding branch objective.</li>
+              <li><strong>$\alpha,\beta$:</strong> trade-off coefficients.</li>
+            </ul>
+              <div class="figure">
+                <img src="../../pre1/teachingAssessment/pre1work/figs/scm_diagram.png" alt="Causal intervention intuition" />
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2 class="card-title">Contrastive Intervention</h2>
+            <div class="card-body intervention-body">
+            <div class="formula">
+$$L_{\mathrm{CI}}=-\frac{1}{B}\sum_{i=1}^{B}\log\frac{\exp\big(\mathrm{sim}(H_{g,i},H_{\mathrm{mix},ij})\big)}{\sum_{k=1,\,k\ne i}^{B}\exp\big(\mathrm{sim}(H_{g,i},H_{g,k})\big)}$$
+            </div>
+            <div class="formula">$$L=L_{\mathrm{GIB}}+\lambda L_{\mathrm{CI}}$$</div>
+            </div>
+          </article>
         </div>
-        <div class="metric">
-          <div class="label">Core Idea</div>
-          <div class="value">Enhanced GIB + Contrastive CI</div>
-        </div>
-        <div class="metric">
-          <div class="label">GOOD-ZINC</div>
-          <div class="value">SOTA in 4 shifts</div>
-        </div>
-        <div class="metric">
-          <div class="label">ReactionOOD</div>
-          <div class="value">Best OOD in 6/10</div>
-        </div>
+
+        <article class="card">
+          <h2 class="card-title">Main Regression Results</h2>
+          <div class="card-body results-body">
+          <div class="figure primary">
+            <img src="../../pre1/teachingAssessment/pre1work/figs/good_zinc_table.png" alt="GOOD-ZINC results" />
+          </div>
+          <div class="figure secondary">
+            <img src="../../pre1/teachingAssessment/pre1work/figs/reactionood_table.png" alt="ReactionOOD results" />
+          </div>
+          <div class="kpi">
+            <div class="kpi-item"><strong>6/10</strong>Best OOD RMSE settings</div>
+            <div class="kpi-item"><strong>2x</strong>Margin over second-best in key splits</div>
+          </div>
+          </div>
+        </article>
       </section>
 
-      <section class="cols">
-        <div class="col">
-          <div class="card">
-            <h2>1. Motivation & Gap</h2>
-            <p><strong>Observation 1:</strong> Most CGL methods are tailored for classification, while regression is harder and under-explored.</p>
-            <p><strong>Observation 2:</strong> Existing assumptions often treat confounders as pure noise.</p>
-            <p><strong>Issue:</strong> In real applications, confounders can still carry predictive signal, so forcing zero utility harms disentanglement.</p>
-            <p><strong>Goal:</strong> Improve OOD generalization for graph-level regression by revisiting confounding effects.</p>
-            <div>
-              <span class="tag">OOD Robustness</span>
-              <span class="tag">Causal Representation</span>
-              <span class="tag">Regression</span>
+      <section class="row-c">
+        <article class="card">
+          <h2 class="card-title">Ablation Evidence</h2>
+          <div class="card-body ablation-body">
+            <img src="../../pre1/teachingAssessment/pre1work/figs/ablation_confounder.png" alt="Ablation on confounder modeling" />
+            <img src="../../pre1/teachingAssessment/pre1work/figs/ablation_contrastive.png" alt="Ablation on contrastive intervention" />
+          </div>
+        </article>
+
+        <article class="card">
+          <h2 class="card-title">Take-home Messages</h2>
+          <div class="card-body">
+            <div class="take-body">
+              <ul class="take-list">
+                <li>CGR provides a causal learning recipe specialized for graph regression under OOD shifts.</li>
+                <li>Treating confounders as predictive-but-spurious improves disentanglement and robustness.</li>
+                <li>Contrastive intervention consistently improves OOD performance on GOOD-ZINC and ReactionOOD.</li>
+              </ul>
             </div>
           </div>
-
-          <div class="card">
-            <h2>2. Framework Overview</h2>
-            <div class="flow">
-              <div class="node">Input Graph G</div>
-              <div class="arrow">→</div>
-              <div class="node">Learnable Masks<br/>Causal C / Confounding S</div>
-              <div class="arrow">→</div>
-              <div class="node">Dual Readouts + Joint Loss</div>
-            </div>
-            <h3>Enhanced GIB</h3>
-            <div class="formula">L_GIB = -I(C;Y) + αI(C;G) - βI(S;Y)</div>
-            <p class="note">Unlike prior work, the term <strong>I(S;Y)</strong> explicitly models the predictive role of confounders instead of ignoring it.</p>
-            <h3>Contrastive Causal Intervention</h3>
-            <p>Construct mixed representation <strong>Hmix,ij = Hc,i + Hs,j</strong>, then align (Hg,i, Hmix,ij) as positive and other Hg,k as negatives.</p>
-            <div class="formula">L = L_GIB + λL_CI</div>
-          </div>
-
-          <div class="card">
-            <h2>3. Why It Works</h2>
-            <ul>
-              <li>Balances causal compression and prediction utility.</li>
-              <li>Avoids collapsing confounders to “all noise”.</li>
-              <li>Removes label-dependence in intervention for continuous targets.</li>
-              <li>Improves invariance while preserving useful signal.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col">
-          <div class="card">
-            <h2>4. GOOD-ZINC (MAE)</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Setting</th>
-                  <th>Best Baseline OOD</th>
-                  <th>OURS OOD</th>
-                  <th>Relative Gain</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Scaffold-Cov</td>
-                  <td>0.1419 (GSAT)</td>
-                  <td class="best">0.1046</td>
-                  <td class="good">26.3% ↓</td>
-                </tr>
-                <tr>
-                  <td>Scaffold-Concept</td>
-                  <td>0.0999 (GSAT)</td>
-                  <td class="best">0.0518</td>
-                  <td class="good">48.1% ↓</td>
-                </tr>
-                <tr>
-                  <td>Size-Cov</td>
-                  <td>0.2112 (GSAT)</td>
-                  <td class="best">0.1484</td>
-                  <td class="good">29.7% ↓</td>
-                </tr>
-                <tr>
-                  <td>Size-Concept</td>
-                  <td>0.1043 (GSAT)</td>
-                  <td class="best">0.0580</td>
-                  <td class="good">44.4% ↓</td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="note">Numbers from Table 1 in paper; lower is better.</p>
-          </div>
-
-          <div class="card">
-            <h2>5. ReactionOOD (RMSE)</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Dataset / Shift</th>
-                  <th>Best Baseline OOD</th>
-                  <th>OURS OOD</th>
-                  <th>Rank</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Cycloaddition / TAN-Concept</td>
-                  <td>5.64 (GSAT)</td>
-                  <td class="best">5.53</td>
-                  <td class="good">1st</td>
-                </tr>
-                <tr>
-                  <td>Cycloaddition / TAN-Cov</td>
-                  <td class="best">4.36 (ERM)</td>
-                  <td>4.42</td>
-                  <td>2nd</td>
-                </tr>
-                <tr>
-                  <td>RDB7 / TAN-Cov</td>
-                  <td>7.66 (ERM)</td>
-                  <td class="best">6.84</td>
-                  <td class="good">1st</td>
-                </tr>
-                <tr>
-                  <td>RDB7 / TAN-Concept</td>
-                  <td>15.79 (ERM)</td>
-                  <td class="best">15.73</td>
-                  <td class="good">1st</td>
-                </tr>
-                <tr>
-                  <td>E2&SN2 / Cov</td>
-                  <td>5.38 (DANN)</td>
-                  <td class="best">4.83</td>
-                  <td class="good">1st</td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="note">Paper summary: best OOD in 6/10 settings, runner-up in 2/10.</p>
-          </div>
-
-          <div class="card">
-            <h2>6. Ablation Insights</h2>
-            <ul>
-              <li>Ignoring confounder predictive power weakens disentanglement and OOD performance.</li>
-              <li>Contrastive intervention outperforms supervised intervention in robustness.</li>
-              <li>Both <strong>L_GIB</strong> and <strong>L_CI</strong> are complementary; using both gives the best overall performance.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col">
-          <div class="card">
-            <h2>7. Contributions</h2>
-            <ul>
-              <li>First explicit treatment of confounder predictive role in causal graph regression.</li>
-              <li>Generalizes class-dependent causal intervention to regression via contrastive learning.</li>
-              <li>Delivers consistent gains on GOOD and ReactionOOD under multiple shifts.</li>
-            </ul>
-          </div>
-
-          <div class="card">
-            <h2>8. Practical Takeaways</h2>
-            <ul>
-              <li>When targets are continuous, avoid classification-only intervention designs.</li>
-              <li>Model confounders explicitly instead of forcing them to be non-predictive.</li>
-              <li>Use representation-level intervention for label-scarce or label-inapplicable settings.</li>
-            </ul>
-          </div>
-
-          <div class="card">
-            <h2>9. Limitations & Future Work</h2>
-            <ul>
-              <li>Hyperparameter sensitivity exists for λ; careful tuning remains important.</li>
-              <li>Smaller datasets may still challenge causal disentanglement quality.</li>
-              <li>Future: combine with stronger pretraining and evaluate on broader graph domains.</li>
-            </ul>
-          </div>
-
-          <div class="card">
-            <h2>10. References</h2>
-            <ul class="refs">
-              <li>Yin et al. (2025). A Recipe for Causal Graph Regression. ICML.</li>
-              <li>Sui et al. (2022, 2024). Causal attention learning on graphs.</li>
-              <li>Miao et al. (2022). GSAT.</li>
-              <li>Gui et al. (2022). GOOD benchmark.</li>
-              <li>Wang et al. (2023). ReactionOOD benchmark.</li>
-            </ul>
-          </div>
-
-          <div class="card" style="background:#fffdf8;border-color:#f2d6b3;">
-            <h2 style="color:#9a3412;border-bottom-color:#f2d6b3;">Presentation Cue (2–3 min)</h2>
-            <p><strong>30s</strong> problem + gap</p>
-            <p><strong>60s</strong> method (Enhanced GIB + CI)</p>
-            <p><strong>40s</strong> results (GOOD + ReactionOOD)</p>
-            <p><strong>20s</strong> takeaway + Q&A</p>
-          </div>
-        </div>
+        </article>
       </section>
     </main>
-
-    <footer class="footer">
-      <span>Data source: ICML paper tables (GOOD-ZINC, ReactionOOD).</span>
-      <span>Current status: High-density poster first draft (style-refined).</span>
-    </footer>
   </article>
 </body>
 </html>
