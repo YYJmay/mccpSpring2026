@@ -51,7 +51,7 @@ The bottom takeaway summarises the full story: trustworthy biomedical graph AI s
 
 ### Core message in plain language
 
-My research is about making graph-based AI more trustworthy for biomedicine. Many biomedical problems can be represented as graphs: atoms connected by chemical bonds, proteins connected by spatial contacts, or genes connected by biological interactions.
+This research is about making graph-based AI more trustworthy for biomedicine. Many biomedical problems can be represented as graphs: atoms connected by chemical bonds, proteins connected by spatial contacts, or genes connected by biological interactions.
 
 A model that only gives a prediction is not enough for scientific use. Scientists also need to know what structural evidence the model used, whether the model can reason beyond nearby connections, and whether it respects important physical rules.
 
@@ -119,8 +119,8 @@ Possible note-card prompts:
 
 | Item                       | File(s)                                                   |
 | -------------------------- | --------------------------------------------------------- |
-| One-page slide             | `3mt_slide_no_overflow.html`, `3mt_slide_no_overflow.svg` |
+| One-page slide             | `one_slide.html`                                          |
 | Design & story description | `design_and_story.md`                                     |
-| Audio link                 | `audio_link.md` or uploaded audio file                    |
+| Audio link                 | `one_slide.m4a`                                           |
 
-After recording the audio presentation, I will add the audio file or audio link and submit the required links to the forum post.
+
