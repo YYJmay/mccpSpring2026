@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>3MT Slide — Interpretable Graph Learning for Biomedicine</title>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #EAF0F5; }
+  body { display: grid; place-items: center; padding: 24px; box-sizing: border-box; }
+  .slide-wrap { width: min(1280px, calc(100vw - 48px)); aspect-ratio: 16/9; background: white; box-shadow: 0 18px 40px rgba(16,32,51,.16); }
+  svg { width: 100%; height: 100%; display: block; }
+</style>
+</head>
+<body>
+<div class="slide-wrap">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">Interpretable Graph Learning for Biomedicine</title>
+  <desc id="desc">A compact one-slide 3MT visual. It explains that a graph is nodes plus edges and presents three connected studies: local motifs, structural attention, and physical long-range learning. The research logic moves from local evidence to global dependency to physical law.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FCFDFE"/>
+      <stop offset="100%" stop-color="#F2F5F8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#12283D" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#8390A0"/>
+    </marker>
+    <style><![CDATA[
+      .title { font: 700 38px Georgia, 'Times New Roman', serif; fill: #142B45; }
+      .subtitle { font: 400 19px Arial, Helvetica, sans-serif; fill: #4D6074; }
+      .section { font: 700 13px Arial, Helvetica, sans-serif; fill: #65768A; letter-spacing: 1.6px; }
+      .h1 { font: 700 30px Georgia, 'Times New Roman', serif; fill: #142B45; }
+      .h2 { font: 700 25px Georgia, 'Times New Roman', serif; fill: #142B45; }
+      .h3 { font: 700 22px Georgia, 'Times New Roman', serif; fill: #142B45; }
+      .body { font: 400 17px Arial, Helvetica, sans-serif; fill: #4A5B6D; }
+      .small { font: 400 15.5px Arial, Helvetica, sans-serif; fill: #526477; }
+      .tiny { font: 400 14px Arial, Helvetica, sans-serif; fill: #5F7082; }
+      .strong { font: 700 15.5px Arial, Helvetica, sans-serif; fill: #253E58; }
+      .pill { font: 700 12px Arial, Helvetica, sans-serif; fill: white; letter-spacing: 1px; }
+      .chip { font: 700 12px Arial, Helvetica, sans-serif; fill: #40566E; letter-spacing: .5px; }
+      .rail { font: 700 13px Arial, Helvetica, sans-serif; fill: #5E6F83; letter-spacing: 1px; }
+      .num { font: 700 14px Arial, Helvetica, sans-serif; fill: white; }
+      .takeStrong { font: 700 23px Georgia, 'Times New Roman', serif; fill: white; }
+      .takeText { font: 400 17.5px Arial, Helvetica, sans-serif; fill: white; }
+    ]]></style>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1280" height="10" fill="#24476D"/>
+
+  <text x="64" y="66" class="title">Interpretable Graph Learning for Biomedicine</text>
+  <text x="64" y="100" class="subtitle">Making graph AI accurate, inspectable, and consistent with scientific structure.</text>
+
+  <!-- Left context panel -->
+  <rect x="64" y="138" width="300" height="444" rx="18" fill="white" stroke="#DAE3EC" filter="url(#shadow)"/>
+  <text x="88" y="169" class="section">RESEARCH CONTEXT</text>
+  <text x="88" y="213" class="h1">A graph =</text>
+  <text x="88" y="249" class="h1">nodes + edges</text>
+  <text x="88" y="284" class="body">Biomedical data often describe</text>
+  <text x="88" y="307" class="body">entities and their relationships.</text>
+
+  <g transform="translate(88 332)">
+    <rect x="0" y="0" width="252" height="116" rx="15" fill="#F7F9FC" stroke="#D6DFE8"/>
+    <line x1="48" y1="70" x2="108" y2="38" stroke="#9AA8B8" stroke-width="3"/>
+    <line x1="108" y1="38" x2="170" y2="58" stroke="#9AA8B8" stroke-width="3"/>
+    <line x1="48" y1="70" x2="118" y2="90" stroke="#9AA8B8" stroke-width="3"/>
+    <line x1="118" y1="90" x2="170" y2="58" stroke="#9AA8B8" stroke-width="3"/>
+    <line x1="170" y1="58" x2="212" y2="86" stroke="#9AA8B8" stroke-width="3"/>
+    <circle cx="48" cy="70" r="12" fill="#2B5C8A"/>
+    <circle cx="108" cy="38" r="12" fill="#2E7D7D"/>
+    <circle cx="170" cy="58" r="12" fill="#B9852A"/>
+    <circle cx="118" cy="90" r="12" fill="#2E7D7D"/>
+    <circle cx="212" cy="86" r="12" fill="#2B5C8A"/>
+    <text x="18" y="24" class="section">EXAMPLE</text>
+  </g>
+
+  <g transform="translate(88 470)">
+    <rect x="0" y="0" width="76" height="28" rx="14" fill="#EDF3FA" stroke="#D4DEE9"/>
+    <text x="38" y="19" text-anchor="middle" class="chip">MOLECULE</text>
+    <rect x="88" y="0" width="70" height="28" rx="14" fill="#EDF8F7" stroke="#CFE5E3"/>
+    <text x="123" y="19" text-anchor="middle" class="chip">PROTEIN</text>
+    <rect x="170" y="0" width="82" height="28" rx="14" fill="#FFF6E6" stroke="#E6D4AF"/>
+    <text x="211" y="19" text-anchor="middle" class="chip">NETWORK</text>
+  </g>
+
+  <rect x="88" y="516" width="252" height="56" rx="12" fill="#F8EFEF" stroke="#E3C7C7"/>
+  <text x="104" y="538" class="strong" style="fill:#7C3434">
+    <tspan x="104" dy="0">Problem: prediction must be</tspan>
+    <tspan x="104" dy="20">inspectable.</tspan>
+  </text>
+
+  <!-- Main area -->
+  <text x="404" y="169" class="section">THESIS STORY</text>
+  <text x="404" y="208" class="h2">Build structure into the model</text>
+  <text x="404" y="237" class="body">The three studies are connected by increasing structural scope.</text>
+
+  <!-- Scope rail -->
+  <rect x="404" y="259" width="812" height="44" rx="13" fill="#EEF3F8" stroke="#D5DEE8"/>
+  <text x="431" y="286" class="rail">LOCAL EVIDENCE</text>
+  <path d="M555,281 L640,281" stroke="#8794A4" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="668" y="286" class="rail">GLOBAL DEPENDENCY</text>
+  <path d="M844,281 L929,281" stroke="#8794A4" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="944" y="286" class="rail">PHYSICAL LAW</text>
+
+  <!-- Card 1 -->
+  <rect x="404" y="328" width="250" height="250" rx="18" fill="white" stroke="#D9E2EA" filter="url(#shadow)"/>
+  <rect x="404" y="328" width="250" height="9" rx="18" fill="#2B5C8A"/>
+  <circle cx="432" cy="365" r="15" fill="#2B5C8A"/>
+  <text x="432" y="370" text-anchor="middle" class="num">1</text>
+  <rect x="455" y="351" width="84" height="22" rx="11" fill="#2B5C8A"/>
+  <text x="497" y="366" text-anchor="middle" class="pill">STUDY 1</text>
+  <text x="428" y="407" class="h3">Local motifs</text>
+  <text x="428" y="439" class="strong">Question</text>
+  <text x="428" y="462" class="small">What pattern matters?</text>
+  <text x="428" y="495" class="strong">Method</text>
+  <text x="428" y="518" class="small">Decode learned prototypes</text>
+  <text x="428" y="539" class="small">into graph motifs.</text>
+  <text x="428" y="565" class="tiny">Role: local evidence</text>
+
+  <!-- Card 2 -->
+  <rect x="685" y="328" width="250" height="250" rx="18" fill="white" stroke="#D9E2EA" filter="url(#shadow)"/>
+  <rect x="685" y="328" width="250" height="9" rx="18" fill="#2E7D7D"/>
+  <circle cx="713" cy="365" r="15" fill="#2E7D7D"/>
+  <text x="713" y="370" text-anchor="middle" class="num">2</text>
+  <rect x="736" y="351" width="84" height="22" rx="11" fill="#2E7D7D"/>
+  <text x="778" y="366" text-anchor="middle" class="pill">STUDY 2</text>
+  <text x="709" y="407" class="h3">Structural attention</text>
+  <text x="709" y="439" class="strong">Question</text>
+  <text x="709" y="462" class="small">Which parts relate?</text>
+  <text x="709" y="495" class="strong">Method</text>
+  <text x="709" y="518" class="small">Use graph-kernel similarity</text>
+  <text x="709" y="539" class="small">as fixed attention.</text>
+  <text x="709" y="565" class="tiny">Role: global dependency</text>
+
+  <!-- Card 3 -->
+  <rect x="966" y="328" width="250" height="250" rx="18" fill="white" stroke="#D9E2EA" filter="url(#shadow)"/>
+  <rect x="966" y="328" width="250" height="9" rx="18" fill="#B9852A"/>
+  <circle cx="994" cy="365" r="15" fill="#B9852A"/>
+  <text x="994" y="370" text-anchor="middle" class="num">3</text>
+  <rect x="1017" y="351" width="84" height="22" rx="11" fill="#B9852A"/>
+  <text x="1059" y="366" text-anchor="middle" class="pill">STUDY 3</text>
+  <text x="990" y="407" class="h3">Long-range physics</text>
+  <text x="990" y="439" class="strong">Question</text>
+  <text x="990" y="462" class="small">Which distant forces matter?</text>
+  <text x="990" y="495" class="strong">Method</text>
+  <text x="990" y="518" class="small">Add physical priors to</text>
+  <text x="990" y="539" class="small">equivariant graph models.</text>
+  <text x="990" y="565" class="tiny">Role: physical grounding</text>
+
+  <!-- Bottom takeaway -->
+  <rect x="64" y="615" width="1152" height="70" rx="18" fill="#16314E"/>
+  <text x="92" y="645" class="takeStrong">Overall message</text>
+  <text x="92" y="672" class="takeText">Trustworthy graph AI links what the model sees, how graph parts relate, and which scientific laws it should respect.</text>
+</svg>
+</div>
+</body>
+</html>
