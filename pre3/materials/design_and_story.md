@@ -8,7 +8,7 @@ This document explains (a) how the one-page slide was designed and (b) how I wil
 
 ### Format and readability
 
-* **Format:** The slide is provided as a one-page HTML file (`3mt_slide_no_overflow.html`). A text-based and machine-readable, as required by the assignment.
+* **Format:** The slide is provided as a one-page HTML file (`one_slide.html`). A text-based and machine-readable, as required by the assignment.
 * **Layout:** The slide uses a single 16:9 view with a left-to-right research flow: **research context → three connected studies → overall message**.
 * **Readability:** I reduced the amount of text on the slide so that it can support a three-minute talk without becoming a written report. The slide uses short labels, manually broken lines, and large visual blocks.
 * **Colour and contrast:** The slide uses a restrained academic colour palette: dark blue for the overall thesis message, teal for structural attention, and warm gold for physical modelling. The colours separate the three studies while keeping the slide visually consistent.
